@@ -1,4 +1,6 @@
-<p align="center"> <a href="https://reactjs.org/" target="_blank"><img src="https://reactjs.org/logo-og.png" width="150" alt="React Logo" /></a> <a href="https://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="NestJS Logo" /></a> </p>
+<p align="center">  <a href="https://reactjs.org/" target="blank">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" width="120" alt="React Logo" />
+  </a><img src="https://reactjs.org/logo-og.png" width="150" alt="React Logo" /></a> <a href="https://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="NestJS Logo" /></a> </p>
 Getting Started
 This project involves both React and NestJS applications.
 
@@ -51,6 +53,3 @@ NestJS Resources
 Visit the NestJS Guide for detailed documentation.
 Support
 This project is open-source and grows with the support of the community. If you want to contribute or support, please consider becoming a backer or sponsor.
-
-Principal Sponsors
-<table style="text-align:center;"> <tr> <td><a href="https://trilon.io" target="_blank"><img src="https://nestjs.com/img/trilon.svg" width="200" valign="middle" /></a></td> <td><a href="https://microsoft.com/" target="_blank"><img src="https://nestjs.com/img/logos/microsoft-logo.png" width="180" valign="middle" /></a></td> <!-- Add more sponsors as needed --> </tr> </table>
