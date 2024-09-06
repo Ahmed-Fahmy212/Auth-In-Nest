@@ -1,5 +1,5 @@
 import { IsString, IsNotEmpty } from 'class-validator';
-import {Exclude,Expose} from 'class-transformer';
+import { Exclude, Expose } from "class-transformer";
 
 @Exclude()
 export class LoginBodyDto {
