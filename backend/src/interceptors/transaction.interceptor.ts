@@ -5,7 +5,7 @@ import {
     NestInterceptor,
   } from '@nestjs/common';
   import { Request } from 'express';
-  import { Observable, catchError, concatMap, finalize } from 'rxjs';
+  import { Observable, catchError, concatMap, finalize, tap } from 'rxjs';
   import { DataSource } from 'typeorm';
   
   export const Transaction = 'Transaction';
@@ -25,7 +25,7 @@ import {
       req[Transaction] = queryRunner.manager;
   
       return next.handle().pipe(
-        concatMap(async (data) => {
+        tap(async (data) => {
           await queryRunner.commitTransaction();
           console.log('💛 TransactionInterceptor committed transaction');
           return data;
