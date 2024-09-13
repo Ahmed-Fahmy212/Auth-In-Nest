@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { EntityNotFoundExceptionFilter } from './utils/enitityEception';
 import { DuplicateExceptionFilter } from './utils/failedQuery';
-
+import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { ValidationPipe } from '@nestjs/common';
 
@@ -15,7 +15,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   app.setGlobalPrefix('v1');
   app.use(helmet({ crossOriginResourcePolicy: false }));
-
+  app.use(cookieParser());
   app.enableCors({
     origin: '*',
     credentials: true,
