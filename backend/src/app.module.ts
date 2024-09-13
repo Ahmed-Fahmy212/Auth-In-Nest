@@ -1,10 +1,14 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module, Scope } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import TypeOrmConfig from './database/ormConfig';
 import { UsersModule } from './modules/users/users.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { RequestLoggerInterceptor } from './interceptors/logger.interceptor';
+import { TransactionInterceptor } from './interceptors/transaction.interceptor';
 
 @Module({
   imports: [
@@ -14,9 +18,20 @@ import { UsersModule } from './modules/users/users.module';
     TypeOrmModule.forRootAsync({
       useFactory: (configService: ConfigService) => TypeOrmConfig.getOrmConfig(configService),
       inject: [ConfigService],
-    }), UsersModule
+    }),
+    UsersModule,
+    AuthModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: RequestLoggerInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TransactionInterceptor
+    }
+  ],
 })
 export class AppModule { }
