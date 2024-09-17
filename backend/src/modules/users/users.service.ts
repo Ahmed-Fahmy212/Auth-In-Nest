@@ -1,55 +1,45 @@
-import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, HttpException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
+import { UsersRepository } from './users.repository';
+import { AuthService } from '../auth/auth.service';
 @Injectable()
 export class UsersService {
-  constructor(@InjectRepository(User) private userRepository: Repository<User>) { }
+  constructor(private userRepository: UsersRepository) { }
 
 
-  public async findByUsernameOrFail(username: string): Promise<User> {
+  public async findByUsername(username: string): Promise<User> {
     try {
-      return await this.userRepository.findOneBy({ username: username });
+      const user = await this.userRepository.findByUsername(username);
+      return user;
     } catch (error) {
       throw new NotFoundException(error.message);
     }
   }
   ////////////////////////////////////////////////////////////////////
   public async create(createUserDto: CreateUserDto): Promise<User> {
-    const { username, password } = createUserDto;
-    const result = await this.userRepository.createQueryBuilder()
-      .insert()
-      .into(User)
-      .values({ username, password })// password is hashed in the entity
-      .execute();
-
-    if (!result.raw || result.raw.length === 0) {
-      throw new HttpException('User isn`t created', 404);
-    }
-
-    const createdUser = await this.userRepository.findOne({ where: { id: result.raw[0].id } });
-
+    const createdUser = await this.userRepository.create(createUserDto);
     if (!createdUser) {
-      throw new NotFoundException('User not found after creation');
+      throw new HttpException('User creation failed', 400);
     }
     return createdUser;
   }
 }
 ////////////////////////////////////////////////////////////////////
-  findAll() {
-  return `This action returns all users`;
-}
-////////////////////////////////////////////////////////////////////
-findOne(id: number) {
-  return `This action returns a #${id} user`;
-}
-////////////////////////////////////////////////////////////////////
-update(id: number, updateUserDto: UpdateUserDto) {
-  return `This action updates a #${id} user`;
-}
-////////////////////////////////////////////////////////////////////
-remove(id: number) {
-  return `This action removes a #${id} user`;
-}
+//   findAll() {
+//   return `This action returns all users`;
+// }
+// ////////////////////////////////////////////////////////////////////
+// findOne(id: number) {
+//   return `This action returns a #${id} user`;
+// }
+// ////////////////////////////////////////////////////////////////////
+// update(id: number, updateUserDto: UpdateUserDto) {
+//   return `This action updates a #${id} user`;
+// }
+// ////////////////////////////////////////////////////////////////////
+// remove(id: number) {
+//   return `This action removes a #${id} user`;
+// }

@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, ServiceUnavailableException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ServiceUnavailableException, Inject, forwardRef, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../users/entities/user.entity';
@@ -7,45 +7,46 @@ import { LoginBodyDto } from './dto/login.dto';
 import { RegisterBodyDto } from './dto/register.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { EmailVerificationRepository } from './repositories/emailVerification.repository';
+import { ICreateEmailVerification } from './interfaces/create-email-verification.interface';
+import { Nodemailer, NodemailerDrivers } from "@crowdlinker/nestjs-mailer";
+
 @Injectable()
 export class AuthService {
-
     constructor(
+        @Inject(forwardRef(() => UsersService)) private usersService: UsersService,
+        private readonly emailVerificationRepository: EmailVerificationRepository,
+        private nodeMailerService: Nodemailer<NodemailerDrivers.SMTP>,
         private readonly jwtService: JwtService,
         private readonly configService: ConfigService,
-        private userService: UsersService,
-        @InjectRepository(User) private userRepository: Repository<User>,
     ) {
     }
-    // login
+    /////////////////////////////////////////////////////////////////////////////////
     public async validateUser(loginBodyDto: LoginBodyDto): Promise<User> {
         try {
-            const user = await this.userRepository.createQueryBuilder('user')
-                .where('user.username = :username', { username: loginBodyDto.username })
-                .getOneOrFail();
-            //! test this or if(!user) throw new UnauthorizedException('Incorrect Username or Password');
+            const foundUser = await this.usersService.findByUsername(loginBodyDto.username);
+            if (!foundUser) throw new UnauthorizedException('Incorrect Username or Password');
             // compare password
-            await User.comparePassword(loginBodyDto.password, user);
-
-            return user;
+            await User.comparePassword(loginBodyDto.password, foundUser);
+            return foundUser;
         }
         catch (error) {
             throw new UnauthorizedException('Incorrect Username or Password');
         }
     }
-    // register
+    /////////////////////////////////////////////////////////////////////////////////
     public async register(registerBodyDto: RegisterBodyDto): Promise<User> {
-        const user = await this.userService.findByUsernameOrFail(registerBodyDto.username); //! check this failer
+        const user = await this.usersService.findByUsername(registerBodyDto.username);
         if (user) {
             throw new UnauthorizedException('Username already exists');
         }
-        const insertedUser = await this.userService.create(registerBodyDto);
+        const insertedUser = await this.usersService.create(registerBodyDto);
         if (!insertedUser) {
             throw new UnauthorizedException('User not registered');
         }
         return insertedUser;
     }
-
+    /////////////////////////////////////////////////////////////////////////////////
     // sign jwt access token
     public async signJwtAccessToken(user: Partial<User>): Promise<string> {
 
@@ -64,7 +65,7 @@ export class AuthService {
         );
     }
     /////////////////////////////////////////////////////////////////////////////////
-    private async generateJwtToken(user: Partial<User>, secret: string, expiresIn: string): Promise<string> {
+    private async generateJwtToken(user: Partial<User>, secret: string, expiresIn: string): Promise<any> {
         try {
             //! is this await useless ? 
             return await this.jwtService.signAsync({ ...user }, { secret, expiresIn })
@@ -72,11 +73,49 @@ export class AuthService {
             throw new ServiceUnavailableException(`Error generating token: ${error.message}`);
         }
     }
-
-    /////////////
-    
     ////////////////////////////////////////////////////////////////////
+    public async generateEmailVerification(email: string): Promise<void> {
+        const emailVerificationCode = await this.emailVerificationRepository.getEmailVerificationData({ email });
+        if (!emailVerificationCode) throw new UnauthorizedException('Email verification code not found');
 
+        // check isEmailVerificationExpired or not
+        const currentTime = new Date();
+        const timestamp = new Date(emailVerificationCode.timestamp);
+
+        const timeDifferenceInMinutes = (currentTime.getTime() - timestamp.getTime()) / (1000 * 60);
+        if (timeDifferenceInMinutes > 10) throw new BadRequestException('Verification code has expired.');
+
+        const emailToken = (Math.floor(Math.random() * (900000)) + 100000).toString();
+        const createEmailVerificationPayload: ICreateEmailVerification = {
+            email,
+            emailToken,
+            timestamp: new Date()
+        };
+        const createdEmailVerifyCode = await this.emailVerificationRepository.createEmailVerification(createEmailVerificationPayload);
+        if (!createdEmailVerifyCode) throw new BadRequestException('Email verification code not created');
+        const url = `<a style="text-decoration: none" href= "http://${this.configService.get<string>('FRONTEND_URL_HOST')}/#/${this.configService.get('FRONTEND_URL_VERIFY_CODE')}/${emailToken}">Click Here To Confirm Your Email</a>`;
+        const sendMailPayload = {
+            from: "fahmy <ahmedfahmy212az@gmail.com>",
+            to: email,
+            subject: "Verify Email",
+            text: "Verify Email",
+            html: `Hi <br><br> <h3>Thanks for registration please verify your email</h3>
+                ${url}`
+        };
+        const sendMail = await this.nodeMailerService.sendMail(sendMailPayload);
+        if (!sendMail) throw new BadRequestException('Email not sent');
+
+        console.log('💛💛 Email sent: %s', sendMail.messageId);
+        console.log('💛💛 all data data', emailVerificationCode,
+            emailToken,
+            createdEmailVerifyCode,
+            sendMail
+        )
+    }
 }
+
+////////////////////////////////////////////////////////////////////
+
+
 
 

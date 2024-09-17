@@ -3,24 +3,17 @@ import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 
 
-export class CookieService  {
-    constructor(private readonly configService: ConfigService,) { }
+export class CookieService {
+    constructor() { }
     public async setRefreshTokenToHttpOnlyCookie(response: Response, refreshToken: string) {
         try {
-            console.log('💛💛');
-            console.log('💛💛Setting cookie with options:', {
-                httpOnly: true,
-                maxAge: this.configService.get<number>('MAX_AGE_REFRESH_TOKEN_IN_HTTP'),
-                path: '/',
-                secure: this.configService.get<boolean>('REFRESH_TOKEN_COOKIE_SECURE'),
-                sameSite: 'strict',
-            });
             response.cookie('refresh_token', refreshToken, {
                 httpOnly: true,
-                maxAge: this.configService.get('MAX_AGE_REFRESH_TOKEN_IN_HTTP'), // 7 days
-                path: '/',//!
-                secure: this.configService.get<boolean>('REFRESH_TOKEN_COOKIE_SECURE'),
-                sameSite: 'strict',
+                maxAge: 604800000, // 7 days
+                path: '/',
+                secure: false,
+                sameSite: 'strict',//! will only be sent in requests to the same site
+                //! want access this in front end i thins and know it work
             });
         } catch (error) {
             throw new ServiceUnavailableException('Refresh token cookie not set');
