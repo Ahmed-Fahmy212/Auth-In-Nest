@@ -6,6 +6,11 @@ export class RegisterBodyDto {
   @IsString()
   username: string;
 
+  @MinLength(4)
+  @IsNotEmpty()
+  @IsString()
+  email: string;
+
   @MinLength(6)
   @IsNotEmpty()
   @IsString()

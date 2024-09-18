@@ -20,6 +20,7 @@ export class UsersRepository extends BaseRepository {
         const user = this.getRepository(User).create({
             username: createUserDto.username,
             password: createUserDto.password,
+            email: createUserDto.email,
         });
         const createdUser = await this.getRepository(User).save(user);
         return createdUser;
