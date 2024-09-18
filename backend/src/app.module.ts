@@ -9,6 +9,9 @@ import { AuthModule } from './modules/auth/auth.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { RequestLoggerInterceptor } from './interceptors/logger.interceptor';
 import { TransactionInterceptor } from './interceptors/transaction.interceptor';
+import { NodemailerDrivers, NodemailerModule, NodemailerOptions } from "@crowdlinker/nestjs-mailer";
+import { config } from 'process';
+import { MailerConfig } from './config/Mailer.config';
 
 @Module({
   imports: [
@@ -19,6 +22,11 @@ import { TransactionInterceptor } from './interceptors/transaction.interceptor';
       useFactory: (configService: ConfigService) => TypeOrmConfig.getOrmConfig(configService),
       inject: [ConfigService],
     }),
+    // NodemailerModule.forRootAsync({
+    //   useFactory: (ConfigService: ConfigService) => MailerConfig.getConfig(ConfigService),
+    //   inject: [ConfigService],
+    // })
+    // ,
     UsersModule,
     AuthModule
   ],

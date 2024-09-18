@@ -9,6 +9,7 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { LocalAuthGuard } from '../guards/local-auth.guard';
 import { CookieService } from 'src/utils/RefreshToken';
 import { EmailVerificationRepository } from './repositories/emailVerification.repository';
+import { Nodemailer } from '@crowdlinker/nestjs-mailer';
 
 @Module({
     imports: [

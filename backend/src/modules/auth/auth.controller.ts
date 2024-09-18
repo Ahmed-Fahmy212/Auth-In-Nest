@@ -36,7 +36,7 @@ export class AuthController {
         const refreshToken = await this.authService.signJwtRefreshToken(user);
 
         await this.cookieService.setRefreshTokenToHttpOnlyCookie(response, refreshToken);
-        await this.authService.generateEmailVerification(user.email);
+        // await this.authService.generateEmailVerification(user.email);
         response.send({ username: user.username, accessToken: accessToken });
     }
     /////////////////////////////////////////////////////////////////////////////////////////////

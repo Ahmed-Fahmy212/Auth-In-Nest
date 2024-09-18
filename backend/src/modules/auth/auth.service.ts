@@ -5,8 +5,6 @@ import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { LoginBodyDto } from './dto/login.dto';
 import { RegisterBodyDto } from './dto/register.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { EmailVerificationRepository } from './repositories/emailVerification.repository';
 import { ICreateEmailVerification } from './interfaces/create-email-verification.interface';
 import { Nodemailer, NodemailerDrivers } from "@crowdlinker/nestjs-mailer";
@@ -16,7 +14,7 @@ export class AuthService {
     constructor(
         @Inject(forwardRef(() => UsersService)) private usersService: UsersService,
         private readonly emailVerificationRepository: EmailVerificationRepository,
-        private nodeMailerService: Nodemailer<NodemailerDrivers.SMTP>,
+        // private nodeMailerService: Nodemailer<NodemailerDrivers.SMTP>,
         private readonly jwtService: JwtService,
         private readonly configService: ConfigService,
     ) {
@@ -74,44 +72,48 @@ export class AuthService {
         }
     }
     ////////////////////////////////////////////////////////////////////
-    public async generateEmailVerification(email: string): Promise<void> {
-        const emailVerificationCode = await this.emailVerificationRepository.getEmailVerificationData({ email });
-        if (!emailVerificationCode) throw new UnauthorizedException('Email verification code not found');
+    // public async generateEmailVerification(email: string): Promise<any> {
+    //     const emailVerificationCode = await this.emailVerificationRepository.getEmailVerificationData({ email });
+    //     // check isEmailVerificationExpired or not
+    //     if (emailVerificationCode) {
+    //         const currentTime = new Date();
+    //         const timestamp = new Date(emailVerificationCode.timestamp);
 
-        // check isEmailVerificationExpired or not
-        const currentTime = new Date();
-        const timestamp = new Date(emailVerificationCode.timestamp);
+    //         const timeDifferenceInMinutes = (currentTime.getTime() - timestamp.getTime()) / (1000 * 60);
+    //         if (timeDifferenceInMinutes > 10) throw new BadRequestException('Verification code has expired.');
+    //     }
 
-        const timeDifferenceInMinutes = (currentTime.getTime() - timestamp.getTime()) / (1000 * 60);
-        if (timeDifferenceInMinutes > 10) throw new BadRequestException('Verification code has expired.');
+    //     const emailToken = (Math.floor(Math.random() * (900000)) + 100000).toString();
+    //     const createEmailVerificationPayload: ICreateEmailVerification = {
+    //         email,
+    //         emailToken,
+    //         timestamp: new Date()
+    //     };
+    //     const createdEmailVerifyCode = await this.emailVerificationRepository.createEmailVerification(createEmailVerificationPayload);
+    //     if (!createdEmailVerifyCode) throw new BadRequestException('Email verification code not created');
 
-        const emailToken = (Math.floor(Math.random() * (900000)) + 100000).toString();
-        const createEmailVerificationPayload: ICreateEmailVerification = {
-            email,
-            emailToken,
-            timestamp: new Date()
-        };
-        const createdEmailVerifyCode = await this.emailVerificationRepository.createEmailVerification(createEmailVerificationPayload);
-        if (!createdEmailVerifyCode) throw new BadRequestException('Email verification code not created');
-        const url = `<a style="text-decoration: none" href= "http://${this.configService.get<string>('FRONTEND_URL_HOST')}/#/${this.configService.get('FRONTEND_URL_VERIFY_CODE')}/${emailToken}">Click Here To Confirm Your Email</a>`;
-        const sendMailPayload = {
-            from: "fahmy <ahmedfahmy212az@gmail.com>",
-            to: email,
-            subject: "Verify Email",
-            text: "Verify Email",
-            html: `Hi <br><br> <h3>Thanks for registration please verify your email</h3>
-                ${url}`
-        };
-        const sendMail = await this.nodeMailerService.sendMail(sendMailPayload);
-        if (!sendMail) throw new BadRequestException('Email not sent');
+    //     console.log('💛💛 email', email,)
+    //     console.log('💛💛 createdEmailVerifyCode', createdEmailVerifyCode,)
+    //     const url = `<a style="text-decoration: none" href= "http://${this.configService.get<string>('FRONTEND_URL_HOST')}/#/${this.configService.get('FRONTEND_URL_VERIFY_CODE')}/${emailToken}">Click Here To Confirm Your Email</a>`;
+    //     const sendMailPayload = {
+    //         from: "Ahmed-Shabana <ahmedshabana646@gmail.com>",
+    //         to: 'ahmedfahmy212az@gmail.com',
+    //         subject: "Verify Email",
+    //         text: "Verify Email",
+    //         html: `Hi <br><br> <h3>Thanks for registration please verify your email</h3>
+    //             ${url}`
+    //     };
+    //     const sendMail = await this.nodeMailerService.sendMail(sendMailPayload);
+    //     if (!sendMail) throw new BadRequestException('Email not sent');
 
-        console.log('💛💛 Email sent: %s', sendMail.messageId);
-        console.log('💛💛 all data data', emailVerificationCode,
-            emailToken,
-            createdEmailVerifyCode,
-            sendMail
-        )
-    }
+    //     console.log('💛💛 Email sent: %s', sendMail.messageId);
+    //     console.log('💛💛 all data data', emailVerificationCode,
+    //         emailToken,
+    //         createdEmailVerifyCode,
+    //         sendMail
+    //     )
+    //     return createdEmailVerifyCode;
+    // }
 }
 
 ////////////////////////////////////////////////////////////////////
