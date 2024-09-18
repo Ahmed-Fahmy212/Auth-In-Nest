@@ -26,6 +26,9 @@ export class UsersService {
     }
     return createdUser;
   }
+////////////////////////////////////////////////////////////////////
+public async getUserByEmail(email: string) {
+  return this.userRepository.getUserByEmail(email);
 }
 ////////////////////////////////////////////////////////////////////
 //   findAll() {
@@ -43,3 +46,4 @@ export class UsersService {
 // remove(id: number) {
 //   return `This action removes a #${id} user`;
 // }
+}
