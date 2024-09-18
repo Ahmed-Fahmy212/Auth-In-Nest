@@ -27,17 +27,17 @@ import {
       return next.handle().pipe(
         tap(async (data) => {
           await queryRunner.commitTransaction();
-          console.log('💛 TransactionInterceptor committed transaction');
+          console.log('💛 committed transaction');
           return data;
         }),
         catchError(async (e) => {
           await queryRunner.rollbackTransaction();
-          console.log('💛 TransactionInterceptor rolled back transaction');
+          console.log('⛔🤍 rolled back transaction');
           throw e;
         }),
         finalize(async () => {
           await queryRunner.release();
-          console.log('💛 TransactionInterceptor released connection');
+          console.log('💛 released connection');
         }),
       );
     }
