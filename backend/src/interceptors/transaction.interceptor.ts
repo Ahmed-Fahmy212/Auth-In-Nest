@@ -21,23 +21,24 @@ import {
       await queryRunner.connect();
       await queryRunner.startTransaction();
   
-      console.log('💛 TransactionInterceptor started transaction'); 
+      console.log('🤍 TransactionInterceptor started transaction'); 
       req[Transaction] = queryRunner.manager;
   
       return next.handle().pipe(
-        tap(async (data) => {
+        concatMap(async (data) => {
           await queryRunner.commitTransaction();
-          console.log('💛 committed transaction');
+          console.log('🤍 committed transaction');
           return data;
         }),
         catchError(async (e) => {
           await queryRunner.rollbackTransaction();
-          console.log('⛔🤍 rolled back transaction');
+          console.log('⛔ rolled back transaction');
+          console.log('⛔⛔', e.message);
           throw e;
         }),
         finalize(async () => {
           await queryRunner.release();
-          console.log('💛 released connection');
+          console.log('🤍 released connection');
         }),
       );
     }
