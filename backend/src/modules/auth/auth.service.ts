@@ -39,6 +39,7 @@ export class AuthService {
             throw new UnauthorizedException('Username already exists');
         }
         const insertedUser = await this.usersService.create(registerBodyDto);
+        console.log('💛💛 insertedUser', insertedUser)
         if (!insertedUser) {
             throw new UnauthorizedException('User not registered');
         }
@@ -72,48 +73,67 @@ export class AuthService {
         }
     }
     ////////////////////////////////////////////////////////////////////
-    // public async generateEmailVerification(email: string): Promise<any> {
-    //     const emailVerificationCode = await this.emailVerificationRepository.getEmailVerificationData({ email });
-    //     // check isEmailVerificationExpired or not
-    //     if (emailVerificationCode) {
-    //         const currentTime = new Date();
-    //         const timestamp = new Date(emailVerificationCode.timestamp);
+    public async generateEmailVerification(email: string): Promise<any> {
+        const emailVerificationCode = await this.emailVerificationRepository.getEmailVerificationData({ email });
+        // check isEmailVerificationExpired or not
+        if (emailVerificationCode) {
+            const currentTime = new Date();
+            const timestamp = new Date(emailVerificationCode.timestamp);
 
-    //         const timeDifferenceInMinutes = (currentTime.getTime() - timestamp.getTime()) / (1000 * 60);
-    //         if (timeDifferenceInMinutes > 10) throw new BadRequestException('Verification code has expired.');
-    //     }
+            const timeDifferenceInMinutes = (currentTime.getTime() - timestamp.getTime()) / (1000 * 60);
+            if (timeDifferenceInMinutes > 10) throw new BadRequestException('Verification code has expired.');
+        }
 
-    //     const emailToken = (Math.floor(Math.random() * (900000)) + 100000).toString();
-    //     const createEmailVerificationPayload: ICreateEmailVerification = {
-    //         email,
-    //         emailToken,
-    //         timestamp: new Date()
-    //     };
-    //     const createdEmailVerifyCode = await this.emailVerificationRepository.createEmailVerification(createEmailVerificationPayload);
-    //     if (!createdEmailVerifyCode) throw new BadRequestException('Email verification code not created');
+        const emailToken = (Math.floor(Math.random() * (900000)) + 100000).toString();
+        const createEmailVerificationPayload: ICreateEmailVerification = {
+            email,
+            emailToken,
+            timestamp: new Date()
+        };
+        const createdEmailVerifyCode = await this.emailVerificationRepository.createEmailVerification(createEmailVerificationPayload);
+        if (!createdEmailVerifyCode) throw new BadRequestException('Email verification code not created');
 
-    //     console.log('💛💛 email', email,)
-    //     console.log('💛💛 createdEmailVerifyCode', createdEmailVerifyCode,)
-    //     const url = `<a style="text-decoration: none" href= "http://${this.configService.get<string>('FRONTEND_URL_HOST')}/#/${this.configService.get('FRONTEND_URL_VERIFY_CODE')}/${emailToken}">Click Here To Confirm Your Email</a>`;
-    //     const sendMailPayload = {
-    //         from: "Ahmed-Shabana <ahmedshabana646@gmail.com>",
-    //         to: 'ahmedfahmy212az@gmail.com',
-    //         subject: "Verify Email",
-    //         text: "Verify Email",
-    //         html: `Hi <br><br> <h3>Thanks for registration please verify your email</h3>
-    //             ${url}`
-    //     };
-    //     const sendMail = await this.nodeMailerService.sendMail(sendMailPayload);
-    //     if (!sendMail) throw new BadRequestException('Email not sent');
+        // console.log('💛💛 email', email,)
+        // console.log('💛💛 createdEmailVerifyCode', createdEmailVerifyCode,)
+        // const url = `<a style="text-decoration: none" href= "http://${this.configService.get<string>('FRONTEND_URL_HOST')}/#/${this.configService.get('FRONTEND_URL_VERIFY_CODE')}/${emailToken}">Click Here To Confirm Your Email</a>`;
+        // const sendMailPayload = {
+        //     from: "Ahmed-Shabana <ahmedshabana646@gmail.com>",
+        //     to: 'ahmedfahmy212az@gmail.com',
+        //     subject: "Verify Email",
+        //     text: "Verify Email",
+        //     html: `Hi <br><br> <h3>Thanks for registration please verify your email</h3>
+        //         ${url}`
+        // };
+        // const sendMail = await this.nodeMailerService.sendMail(sendMailPayload);
+        // if (!sendMail) throw new BadRequestException('Email not sent');
 
-    //     console.log('💛💛 Email sent: %s', sendMail.messageId);
-    //     console.log('💛💛 all data data', emailVerificationCode,
-    //         emailToken,
-    //         createdEmailVerifyCode,
-    //         sendMail
-    //     )
-    //     return createdEmailVerifyCode;
-    // }
+        // console.log('💛💛 Email sent: %s', sendMail.messageId);
+        // console.log('💛💛 all data data', emailVerificationCode,
+        //     emailToken,
+        //     createdEmailVerifyCode,
+        //     sendMail
+        // )
+        return createdEmailVerifyCode;
+    }
+    ////////////////////////////////////////////////////////////////////
+    public async verifyEmail(token: string): Promise<User> {
+        const emailVerificationData = await this.emailVerificationRepository.getEmailVerificationData({ emailToken: token }); //! why email token ?
+        if (!emailVerificationData || !emailVerificationData.emailToken) throw new BadRequestException("LOGIN_EMAIL_CODE_NOT_VALID");
+
+        const userData: User = await this.usersService.getUserByEmail(emailVerificationData.email);
+        if (!userData) throw new UnauthorizedException('User not found');
+        if (userData.isEmailVerified) throw new UnauthorizedException('Email already verified');
+
+        await this.usersService.makeUserVerified(userData.id);
+
+        await this.deleteEmailVerificationById(emailVerificationData.id);
+        
+        return userData;
+    }
+
+    private async deleteEmailVerificationById(id: string) {
+        return await this.emailVerificationRepository.deleteForgottenPasswordTokenById(id);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////

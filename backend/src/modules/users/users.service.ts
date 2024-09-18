@@ -31,6 +31,11 @@ public async getUserByEmail(email: string) {
   return this.userRepository.getUserByEmail(email);
 }
 ////////////////////////////////////////////////////////////////////
+public async makeUserVerified(userId: string) {
+  return this.userRepository.makeUserVerified(userId);
+}
+
+////////////////////////////////////////////////////////////////////
 //   findAll() {
 //   return `This action returns all users`;
 // }

@@ -17,7 +17,7 @@ export class EmailVerificationRepository extends BaseRepository {
   public async getEmailVerificationData(payload: IFilterEmailVerification) {
     return await this.getRepository(EmailVerification)
       .createQueryBuilder('emailVerification')
-      .where('emailVerification.email = :email', { email: payload.email }).getOne();
+      .where('emailVerification.email = :email', { email: payload.emailToken }).getOne(); //! this is wrong
   }
 
   public async createEmailVerification(payload: ICreateEmailVerification) {
@@ -27,6 +27,8 @@ export class EmailVerificationRepository extends BaseRepository {
       .values(payload)
       .execute();
   }
-
+  public async deleteForgottenPasswordTokenById(id: string) {
+    return this.getRepository(EmailVerification).delete(id);
+  }
 
 }

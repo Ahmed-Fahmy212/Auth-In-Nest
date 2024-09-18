@@ -28,4 +28,7 @@ export class UsersRepository extends BaseRepository {
     public async getUserByEmail(email: string): Promise<User> {
         return this.getRepository(User).findOne({ where: { email: email.toString().trim() } });
     }
+    public async makeUserVerified(userId: string) {
+        return this.getRepository(User).update(userId, { isEmailVerified: true });
+    }
 }
