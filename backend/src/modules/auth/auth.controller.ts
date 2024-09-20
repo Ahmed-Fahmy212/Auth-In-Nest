@@ -5,6 +5,7 @@ import {
     HttpCode,
     HttpStatus,
     Post,
+    Req,
     Res,
     UseGuards,
 
@@ -19,6 +20,9 @@ import { ConfigService } from '@nestjs/config';
 import { CookieService } from 'src/utils/RefreshToken';
 import { AuthUser } from 'src/decorators/auth-user.decorator';
 import { VerifyEmailDto } from './dto/verify-email.dto';
+import { Request } from 'express';
+import { use } from 'passport';
+import { ResetPasswordDto } from './dto/resetPassword.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -35,10 +39,10 @@ export class AuthController {
         const accessToken = await this.authService.signJwtAccessToken(user)
         const refreshToken = await this.authService.signJwtRefreshToken(user);
 
-        await this.cookieService.setRefreshTokenToHttpOnlyCookie(response, refreshToken);
+        // await this.cookieService.setRefreshTokenToHttpOnlyCookie(response, refreshToken);
         await this.authService.generateEmailVerification(user.email);
-        return { username: user.username, accessToken: accessToken };
-        response.send({ username: user.username, accessToken: accessToken });
+        // return { username: user.username, accessToken: accessToken };
+        response.send({ username: user.username, accessToken: accessToken, refreshToken: refreshToken });
     }
     /////////////////////////////////////////////////////////////////////////////////////////////
     @UseGuards(LocalAuthGuard) // want apply best parctice here
@@ -49,13 +53,19 @@ export class AuthController {
 
         this.cookieService.setRefreshTokenToHttpOnlyCookie(response, refreshToken);
         return { username: user.username, accessToken: accessToken };
-        response.send({ username: user.username, accessToken: accessToken });
-    }
 
+    }
+    /////////////////////////////////////////////////////////////////////////////////////////////
     @Post('verify-email')
     async verifyEmail(@Body("emailToken") token: string) {
         return await this.authService.verifyEmail(token);
     }
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    @Post("send-email-verification")
+    sendEmailVerification(@Body("email") email: string) {
+        return this.authService.sendEmailVerificationRequest(email);
+    }
 
+    
 }
 
