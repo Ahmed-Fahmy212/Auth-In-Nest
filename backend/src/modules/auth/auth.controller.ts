@@ -66,6 +66,12 @@ export class AuthController {
         return this.authService.sendEmailVerificationRequest(email);
     }
 
-    
+        /////////////////////////////////////////////////////////////////////////////////////////////
+    @Post('refresh-token')
+    async refreshToken(@Req() request: Request) {
+        const refreshToken = request.cookies['refreshToken'];
+        return await this.authService.refreshToken(refreshToken);
+    }
+
 }
 

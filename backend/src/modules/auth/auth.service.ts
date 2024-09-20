@@ -115,7 +115,14 @@ export class AuthService {
 
         return userData;
     }
-
+    //////////////////////////////////////////////////////////////////
+    public async refreshToken(refreshToken: string) {
+        const payload = this.jwtService.verify(refreshToken, {
+            secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
+        });
+        const user = await this.usersService.findByUsername(payload.username);
+        return await this.signJwtAccessToken(user);
+    }
     //////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////
