@@ -30,6 +30,9 @@ export class User {
     @Column()
     password: string;
 
+    @Column({ nullable: true })
+    refreshToken: string;
+
     @UpdateDateColumn({ type: 'timestamp with time zone' })
     updatedAt: Date;
 
