@@ -139,7 +139,32 @@ export class AuthService {
         await this.sendEmailVerificationRequest(email);
         return createdEmailVerifyCode;
     }
+    //////////////////////////////////////////////////////////////////
+    public async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<string> {
+        const { email, newPasswordToken, currentPassword, newPassword } = resetPasswordDto;
+        let isNewPasswordChanged = false;
+        let encryptedPassword: string;
+        let forgottenPassword: ForgottenPassword | null = null;
+        let userData: User | null = null;
 
+        userData = await this.usersService.getUserByEmail(email);
+        if (!userData) {
+            throw new NotFoundException(`This user does not exist`);
+        }
+
+        const isValidPassword = await User.comparePassword(currentPassword, userData);
+        if (!isValidPassword) {
+            throw new BadRequestException("The current password is incorrect");
+        }
+
+        const updateResult = await this.usersService.editUserPassword(email, encryptedPassword);
+        if (updateResult.affected === 0) {
+            throw new ConflictException("There may be an error in the data entered!");
+        }
+
+        return "Password updated successfully";
+
+    }
     //////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////

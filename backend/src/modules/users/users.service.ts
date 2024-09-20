@@ -34,7 +34,10 @@ public async getUserByEmail(email: string) {
 public async makeUserVerified(userId: string) {
   return this.userRepository.makeUserVerified(userId);
 }
-
+////////////////////////////////////////////////////////////////////
+  public async editUserPassword(email: string, newPassword: string) {
+    return this.userRepository.editUserPassword(email, newPassword);
+  }
 ////////////////////////////////////////////////////////////////////
 //   findAll() {
 //   return `This action returns all users`;

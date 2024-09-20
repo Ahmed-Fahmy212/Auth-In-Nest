@@ -31,4 +31,12 @@ export class UsersRepository extends BaseRepository {
     public async makeUserVerified(userId: string) {
         return this.getRepository(User).update(userId, { isEmailVerified: true });
     }
+    public async editUserPassword(email: string, newPassword: string) {
+        const queryBuilder = this.getRepository(User).createQueryBuilder('user');
+        return await queryBuilder
+            .update(User)
+            .set({ password: newPassword })
+            .where('user.email = :email', { email })
+            .execute();
+    }
 }
