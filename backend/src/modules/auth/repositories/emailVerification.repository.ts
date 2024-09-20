@@ -15,9 +15,15 @@ export class EmailVerificationRepository extends BaseRepository {
   }
 
   public async getEmailVerificationData(payload: IFilterEmailVerification) {
-    return await this.getRepository(EmailVerification)
-      .createQueryBuilder('emailVerification')
-      .where('emailVerification.email = :email', { email: payload.emailToken }).getOne(); //! this is wrong
+    const query = this.getRepository(EmailVerification).createQueryBuilder('emailVerification');
+
+    if (payload.email)
+      query.where('emailVerification.email = :email', { email: payload.email });
+
+    if (payload.emailToken)
+      query.where('emailVerification.emailToken = :emailToken', { emailToken: payload.emailToken });
+
+    return await query.getOne();
   }
 
   public async createEmailVerification(payload: ICreateEmailVerification) {
