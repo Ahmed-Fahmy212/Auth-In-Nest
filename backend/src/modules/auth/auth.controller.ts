@@ -72,6 +72,11 @@ export class AuthController {
         const refreshToken = request.cookies['refreshToken'];
         return await this.authService.refreshToken(refreshToken);
     }
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    @Get('me')
+    async me(@AuthUser() user: User) {
+        return user;
+    }
 
 }
 
