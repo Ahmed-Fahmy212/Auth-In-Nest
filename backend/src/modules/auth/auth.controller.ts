@@ -77,6 +77,12 @@ export class AuthController {
     async me(@AuthUser() user: User) {
         return user;
     }
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    @UseGuards(LocalAuthGuard)
+    @Get('forgot-password')
+    async forgotPassword(@Body("email") email: string) {
+        return await this.authService.forgotPassword(email);
+    }
 
 }
 

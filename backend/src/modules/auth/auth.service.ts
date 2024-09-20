@@ -124,6 +124,23 @@ export class AuthService {
         return await this.signJwtAccessToken(user);
     }
     //////////////////////////////////////////////////////////////////
+    public async forgotPassword(email: string) {
+        const user = await this.usersService.getUserByEmail(email);
+        if (!user) throw new UnauthorizedException('User not found');
+        const emailToken = (Math.floor(Math.random() * (900000)) + 100000).toString();
+        const createEmailVerificationPayload: ICreateEmailVerification = {
+            email,
+            emailToken,
+            timestamp: new Date()
+        };
+        const createdEmailVerifyCode = await this.emailVerificationRepository.createEmailVerification(createEmailVerificationPayload);
+        if (!createdEmailVerifyCode) throw new BadRequestException('Email verification code not created');
+
+        await this.sendEmailVerificationRequest(email);
+        return createdEmailVerifyCode;
+    }
+
+    //////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////
     private async deleteEmailVerificationById(id: string) {
