@@ -14,7 +14,7 @@ import { Response } from 'express';
 
 import { RegisterBodyDto } from './dto/register.dto';
 import { AuthService } from './auth.service';
-import { LocalAuthGuard } from '../guards/local-auth.guard';
+import { LocalAuthGuard } from '../../guards/local-auth.guard';
 import { User } from '../users/entities/user.entity';
 import { ConfigService } from '@nestjs/config';
 import { CookieService } from 'src/utils/RefreshToken';
@@ -23,6 +23,7 @@ import { VerifyEmailDto } from './dto/verify-email.dto';
 import { Request } from 'express';
 import { use } from 'passport';
 import { ResetPasswordDto } from './dto/resetPassword.dto';
+import { Protected } from 'src/decorators/protected.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -66,7 +67,7 @@ export class AuthController {
         return this.authService.sendEmailVerificationRequest(email);
     }
 
-        /////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////
     @Post('refresh-token')
     async refreshToken(@Req() request: Request) {
         const refreshToken = request.cookies['refreshToken'];
@@ -78,7 +79,7 @@ export class AuthController {
         return user;
     }
     /////////////////////////////////////////////////////////////////////////////////////////////
-    @UseGuards(LocalAuthGuard)
+    @UseGuards(Protected)
     @Get('forgot-password')
     async forgotPassword(@Body("email") email: string) {
         return await this.authService.forgotPassword(email);
@@ -87,6 +88,11 @@ export class AuthController {
     @Post('reset-password')
     async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
         return await this.authService.resetPassword(resetPasswordDto);
+    }
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    @Post('logout')
+    async logout(@Res() response: Response) {
+        return 'ok';
     }
 }
 
