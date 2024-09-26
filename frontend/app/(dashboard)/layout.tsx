@@ -10,7 +10,7 @@ const DashnoardLayout = ({ children }: { children: React.ReactNode }) => {
         <Sidebar />
       </div>
 
-      <main className="md:pl-56 h-full">{children}</main>
+      <main className="md:pl-56 h-full pt-[80px]">{children}</main>
     </div>
   );
 };
