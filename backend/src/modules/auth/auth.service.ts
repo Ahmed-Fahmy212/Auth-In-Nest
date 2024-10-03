@@ -9,15 +9,19 @@ import { EmailVerificationRepository } from './repositories/emailVerification.re
 import { ICreateEmailVerification } from './interfaces/create-email-verification.interface';
 import { Nodemailer, NodemailerDrivers } from "@crowdlinker/nestjs-mailer";
 import { ResetPasswordDto } from './dto/resetPassword.dto';
-import { ForgottenPassword } from './repositories/forgotten-password.entity';
+import { ForgottenPassword } from '../users/entities/forgotten-password.entity';
+import { RefreshToken } from '../users/entities/refresh-token.entity';
+import { RefreshTokenRepository } from './repositories/refreshToken.repository';
+import { ICreateRefreshTokenVerification } from './interfaces/create-refresh-token-verification.interface';
 
 @Injectable()
 export class AuthService {
     constructor(
         @Inject(forwardRef(() => UsersService)) private usersService: UsersService,
         private readonly emailVerificationRepository: EmailVerificationRepository,
-        // private nodeMailerService: Nodemailer<NodemailerDrivers.SMTP>,
+        private readonly refreshTokenEntity: RefreshTokenRepository,
         private readonly jwtService: JwtService,
+        // private nodeMailerService: Nodemailer<NodemailerDrivers.SMTP>,
         private readonly configService: ConfigService,
     ) { }
     /////////////////////////////////////////////////////////////////////////////////
@@ -40,7 +44,6 @@ export class AuthService {
             throw new UnauthorizedException('Username already exists');
         }
         const insertedUser = await this.usersService.create(registerBodyDto);
-        console.log('💛💛 insertedUser', insertedUser)
         if (!insertedUser) {
             throw new UnauthorizedException('User not registered');
         }
@@ -49,7 +52,7 @@ export class AuthService {
     /////////////////////////////////////////////////////////////////////////////////
     // sign jwt access token
     public async signJwtAccessToken(user: Partial<User>): Promise<string> {
-
+        console.log('💛💛 user', user)
         return await this.generateJwtToken(user,
             this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
             this.configService.get<string>('JWT_ACCESS_EXPIRATION_TIME'),
@@ -57,7 +60,6 @@ export class AuthService {
         );
     }
     public async signJwtRefreshToken(user: Partial<User>): Promise<string> {
-
         return await this.generateJwtToken(
             user,
             this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
@@ -92,6 +94,20 @@ export class AuthService {
         //     sendMail
         // )
         return createdEmailVerifyCode;
+    }
+    ////////////////////////////////////////////////////////////////////
+    public async storeRefreshToken(userId: string, token: string) {
+        const expiration = new Date();
+        const envRefreshTokenTime = this.configService.get<string>('JWT_REFRESH_EXPIRATION_TIME');
+        expiration.setDate(expiration.getDate() + parseInt(envRefreshTokenTime));
+        const data: ICreateRefreshTokenVerification = {
+            token,
+            userId,
+            expiration,
+            isRevoked: false,
+            tokenVersion: 1,
+        }
+        await this.refreshTokenEntity.save(data);
     }
     ////////////////////////////////////////////////////////////////////
     public async verifyEmail(token: string): Promise<User> {
@@ -175,7 +191,7 @@ export class AuthService {
     public async sendEmailVerificationRequest(email: string) {
         // const url = `<a style="text-decoration: none" href= "http://${this.configService.get<string>('FRONTEND_URL_HOST')}/#/${this.configService.get('FRONTEND_URL_VERIFY_CODE')}/${emailToken}">Click Here To Confirm Your Email</a>`;
         // const sendMailPayload = {
-        //     from: "Ahmed-Shabana <ahmedshabana646@gmail.com>",
+        //     from: "Ahmed-fahmy <ahmedfahmy212@gmail.com>",
         //     to: 'ahmedfahmy212az@gmail.com',
         //     subject: "Verify Email",
         //     text: "Verify Email",
