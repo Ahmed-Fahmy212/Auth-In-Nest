@@ -10,6 +10,7 @@ import { LocalAuthGuard } from '../../guards/local-auth.guard';
 import { CookieService } from 'src/utils/RefreshToken';
 import { EmailVerificationRepository } from './repositories/emailVerification.repository';
 import { Nodemailer } from '@crowdlinker/nestjs-mailer';
+import { RefreshTokenRepository } from './repositories/refreshToken.repository';
 
 @Module({
     imports: [
@@ -22,7 +23,7 @@ import { Nodemailer } from '@crowdlinker/nestjs-mailer';
             inject: [ConfigService],
         }),
     ],
-    providers: [AuthService, LocalStrategy, LocalAuthGuard, CookieService, EmailVerificationRepository],
+    providers: [AuthService, LocalStrategy, LocalAuthGuard, CookieService, EmailVerificationRepository, RefreshTokenRepository],
     controllers: [AuthController],
 })
 export class AuthModule { }

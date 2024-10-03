@@ -1,4 +1,5 @@
 import {
+    BadRequestException,
     Body,
     Controller,
     Get,
@@ -37,9 +38,10 @@ export class AuthController {
         @Res() response: Response, @Body() registerBodyDto: RegisterBodyDto,
     ) {
         const user = await this.authService.register(registerBodyDto);
-        const accessToken = await this.authService.signJwtAccessToken(user)
-        const refreshToken = await this.authService.signJwtRefreshToken(user);
 
+        const accessToken = await this.authService.signJwtAccessToken(user);
+        const refreshToken = await this.authService.signJwtRefreshToken(user);
+        await this.authService.storeRefreshToken(user.id, refreshToken);
         // await this.cookieService.setRefreshTokenToHttpOnlyCookie(response, refreshToken);
         await this.authService.generateEmailVerification(user.email);
         // return { username: user.username, accessToken: accessToken };
@@ -70,8 +72,11 @@ export class AuthController {
     /////////////////////////////////////////////////////////////////////////////////////////////
     @Post('refresh-token')
     async refreshToken(@Req() request: Request) {
-        const refreshToken = request.cookies['refreshToken'];
-        return await this.authService.refreshToken(refreshToken);
+        const [type, token] = request.headers.authorization?.split(' ') ?? [];
+        if (type !== 'Bearer' || !token) {
+            throw new BadRequestException('Invalid token');
+        }
+        return await this.authService.refreshToken(token);
     }
     /////////////////////////////////////////////////////////////////////////////////////////////
     @Get('me')
