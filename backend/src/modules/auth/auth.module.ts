@@ -11,19 +11,32 @@ import { CookieService } from 'src/utils/RefreshToken';
 import { EmailVerificationRepository } from './repositories/emailVerification.repository';
 import { Nodemailer } from '@crowdlinker/nestjs-mailer';
 import { RefreshTokenRepository } from './repositories/refreshToken.repository';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
+import { JwtStrategy } from './strategies/jwt.strategy';
+import { PassportModule } from '@nestjs/passport';
 
 @Module({
     imports: [
         forwardRef(() => UsersModule),
+        PassportModule,
         JwtModule.registerAsync({
             useFactory: (configService: ConfigService) => ({
-                secret: configService.get<string>('JWT_SECRET'),
+                secret: configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
                 signOptions: { expiresIn: '1h' },
             }),
             inject: [ConfigService],
         }),
     ],
-    providers: [AuthService, LocalStrategy, LocalAuthGuard, CookieService, EmailVerificationRepository, RefreshTokenRepository],
+    providers: [
+        JwtStrategy,
+        AuthService,
+        LocalStrategy,
+        LocalAuthGuard,
+        CookieService,
+        EmailVerificationRepository,
+        RefreshTokenRepository,
+        JwtAuthGuard],
     controllers: [AuthController],
+    exports: [JwtAuthGuard],
 })
 export class AuthModule { }
