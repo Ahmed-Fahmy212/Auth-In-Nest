@@ -28,7 +28,7 @@ import { MailerConfig } from './config/Mailer.config';
     // })
     // ,
     UsersModule,
-    AuthModule
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService,
@@ -39,7 +39,7 @@ import { MailerConfig } from './config/Mailer.config';
     {
       provide: APP_INTERCEPTOR,
       useClass: TransactionInterceptor
-    }
+    },
   ],
 })
 export class AppModule { }

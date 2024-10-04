@@ -10,35 +10,21 @@ import { Request } from 'express';
 @Injectable()
 export class PermissionGuard implements CanActivate {
     constructor(
+        private datasource: DataSource,
         private jwtService: JwtService,
         private configService: ConfigService,
-        private request: Request,
     ) { }
-    async canActivate(context: ExecutionContext): Promise<boolean> {
+    public async canActivate(context: ExecutionContext): Promise<boolean> {
         console.log("💛PermissionGuard");
         const request: Request = context.switchToHttp().getRequest();
         const authHeader = request.headers.authorization;
+        const [, token] = authHeader.split(' ');
+
         if (!authHeader) {
             throw new UnauthorizedException('Authorization header missing');
         }
-
-
-        const [, token] = authHeader.split(' ');
-
         if (!token) {
             throw new UnauthorizedException('Token missing');
-        }
-        // connection to the database to check if the user is a super admin
-        const entityManager = this.request[Transaction].manager;
-        console.log("💛 req", request);
-        console.log("💛 req.user", request.user);
-        const foundUser = await entityManager
-            .createQueryBuilder(User, 'user')
-            .where('user.username = :username', { username: request.user })
-            .getOne();
-
-        if (!foundUser) {
-            throw new UnauthorizedException('User not found');
         }
         try {
             const secretKey = this.configService.get<string>('JWT_SECRET');
@@ -46,12 +32,30 @@ export class PermissionGuard implements CanActivate {
                 secret: secretKey,
             });
 
-            if (foundUser.isSuperAdmin) { return true; }
-            //! date handle 
-            // if (payload.iat >)
+            const currentTimestamp = Math.floor(Date.now() / 1000);
+            if (payload.exp < currentTimestamp) {
+                throw new UnauthorizedException('token has expired');
+            }
+            //TODO: why trx not working here
+            const entityManager = request[Transaction]||this.datasource.manager;
+            const foundUser = await entityManager.getRepository(User).findOneOrFail({
+                where: { username: payload.username },
+                select: ['id', 'username', 'email', 'isEmailVerified', 'isSuperAdmin']
+            });
+            if (!foundUser) {
+                throw new UnauthorizedException('User not found');
+            }
+            if (foundUser.isSuperAdmin){
+                return true;
+            }
+            //TODO: add here role and return false 
+            request['user'] = foundUser;
+            return true;
 
         } catch (error) {
-            throw new UnauthorizedException('Invalid token');
+            console.log(error);
+            throw new UnauthorizedException('Invalid token login again ...');
         }
     }
+
 }
