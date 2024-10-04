@@ -1,23 +1,30 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy } from 'passport-jwt';
+import { ExtractJwt , Strategy } from 'passport-jwt';
 import { UsersService } from 'src/modules/users/users.service';
 import { LoginBodyDto } from '../dto/login.dto';
 
 // will changed
+interface JwtPayload {
+    username: string;
+    iat: number;
+    exp: number;
+    sub:string;
+}
+
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-    constructor(configService: ConfigService, private userService: UsersService) {
+export class JwtStrategy extends PassportStrategy (Strategy, 'jwt') {
+    constructor(configService: ConfigService) {
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             ignoreExpiration: false,
-            secretOrKey: configService.get<string>('SECRET_KEY'),
+            secretOrKey: configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
         });
     }
-
-    async validate(payload: LoginBodyDto) {
-        console.log('💛jwt strategy -> payload', payload);
+    //TODO: more data will inserted here + removing any 
+    validate(payload: any) {
+        console.log('Validating JWT payload:', payload);
         return payload;
     }
 }
