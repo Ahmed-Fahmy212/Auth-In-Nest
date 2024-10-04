@@ -12,8 +12,7 @@ export class CookieService {
                 maxAge: 604800000, // 7 days
                 path: '/',
                 secure: false,
-                sameSite: 'strict',//! will only be sent in requests to the same site
-                //! want access this in front end i thins and know it work
+                sameSite: 'strict',
             });
         } catch (error) {
             throw new ServiceUnavailableException('Refresh token cookie not set');
