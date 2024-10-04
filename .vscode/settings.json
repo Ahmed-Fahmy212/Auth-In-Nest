@@ -5,4 +5,7 @@
         "tree.indentGuidesStroke": "#ffffff"
     },
     "todo-tree.tree.showBadges": true,
+    "conventionalCommits.scopes": [
+        "Auth"
+    ],
 }
