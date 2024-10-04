@@ -4,13 +4,23 @@ import { BaseRepository } from "src/common/base-repository";
 import { RefreshToken } from "src/modules/users/entities/refresh-token.entity";
 import { DataSource } from "typeorm";
 import { Request } from 'express';
-import { ICreateRefreshTokenVerification } from "../interfaces/create-refresh-token-verification.interface";
+import { ICreateRefreshTokenVerification, IUpdateRefreshTokenVerification } from "../interfaces/create-refresh-token-verification.interface";
 
 export class RefreshTokenRepository extends BaseRepository {
     constructor(dataSource: DataSource, @Inject(REQUEST) req: Request) {
         super(dataSource, req);
     }
+    async delete(arg0: { expiration: import("typeorm").FindOperator<Date>; }) {
+        //TODO: remove another arguments and in case valdate refresh access token or else compare versions
+        return await this.getRepository(RefreshToken).delete(arg0);
+    }
     async save(data: ICreateRefreshTokenVerification) {
+        return await this.getRepository(RefreshToken).save(data);
+    }
+    async findOne(userId: string) {
+        return await this.getRepository(RefreshToken).findOne({ where: { userId:userId } });
+    }
+    async update(data: IUpdateRefreshTokenVerification) {
         return await this.getRepository(RefreshToken).save(data);
     }
 }   
