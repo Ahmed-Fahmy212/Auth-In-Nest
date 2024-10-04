@@ -27,6 +27,9 @@ export class User {
     @Column({ default: false })
     isEmailVerified: boolean;
 
+    @Column({ default: false })
+    isSuperAdmin: boolean;
+
     @Column()
     password: string;
 
