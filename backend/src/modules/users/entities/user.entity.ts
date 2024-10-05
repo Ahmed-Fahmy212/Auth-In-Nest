@@ -74,7 +74,7 @@ export class User {
             const match = await bcrypt.compare(password, user.password);
 
             if (!match) {
-                throw new UnauthorizedException('Incorrect Username or Password !');
+                return null;
             }
 
             return match;
