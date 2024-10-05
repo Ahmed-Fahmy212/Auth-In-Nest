@@ -43,16 +43,15 @@ export class AuthController {
         response.send({ data: { username: user.username, accessToken: accessToken, refreshToken: refreshToken } });
     }
     /////////////////////////////////////////////////////////////////////////////////////////////
-    @UseGuards(LocalAuthGuard) // want apply best parctice here
+    @UseGuards(LocalAuthGuard)
     @Post('/login')
     public async login(@AuthUser() user: User, @Res() response: Response) {
         const accessToken = await this.authService.signJwtAccessToken(user)
         const refreshToken = await this.authService.signJwtRefreshToken(user);
         await this.authService.storeRefreshToken(user.id, refreshToken);
 
-        this.cookieService.setRefreshTokenToHttpOnlyCookie(response, refreshToken);
-        return { username: user.username, accessToken: accessToken };
-
+        await this.cookieService.setRefreshTokenToHttpOnlyCookie(response, refreshToken);
+        response.send({ data: { username: user.username, accessToken: accessToken, refreshToken: refreshToken } });
     }
     /////////////////////////////////////////////////////////////////////////////////////////////
     @Post('verify-email')
@@ -69,17 +68,17 @@ export class AuthController {
     @Protected()
     @Post('refresh-token')
     async refreshToken(@Req() request, @Res() response: Response) {
-        const [type, token] = request.headers.authorization?.split(' ') ?? [];
-        if (type !== 'Bearer' || !token) {
+        const refreshToken = request.cookies?.refresh_token;
+        if (!refreshToken) {
             throw new BadRequestException('Invalid token');
         }
         const user = request.user;
-        console.log("💛💛💛💛💛💛user", user);
+        console.log("💛💛💛user", user);
         if (!user) {
             throw new BadRequestException('[USER] Invalid token');
         }
 
-        return await this.authService.refreshToken(response,token, user);
+        return await this.authService.refreshToken(response, refreshToken, user);
     }
     /////////////////////////////////////////////////////////////////////////////////////////////
     @Get('me')
