@@ -1,10 +1,7 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt , Strategy } from 'passport-jwt';
-import { UsersService } from 'src/modules/users/users.service';
-import { LoginBodyDto } from '../dto/login.dto';
-
 // will changed
 interface JwtPayload {
     username: string;
