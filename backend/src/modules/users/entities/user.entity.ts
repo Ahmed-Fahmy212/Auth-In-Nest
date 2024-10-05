@@ -36,6 +36,9 @@ export class User {
     @Column({ nullable: true })
     refreshToken: string;
 
+    @Column({ nullable: true })
+    refreshTokenExpiration: Date;
+
     @UpdateDateColumn({ type: 'timestamp with time zone' })
     updatedAt: Date;
 
