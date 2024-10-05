@@ -36,8 +36,7 @@ export class PermissionGuard implements CanActivate {
             if (payload.exp < currentTimestamp) {
                 throw new UnauthorizedException('token has expired');
             }
-            //TODO: why trx not working here
-            const entityManager = request[Transaction]||this.datasource.manager;
+            const entityManager = this.datasource.manager;
             const foundUser = await entityManager.getRepository(User).findOneOrFail({
                 where: { username: payload.username },
                 select: ['id', 'username', 'email', 'isEmailVerified', 'isSuperAdmin']

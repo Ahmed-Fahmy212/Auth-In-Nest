@@ -31,7 +31,6 @@ import { PassportModule } from '@nestjs/passport';
         JwtStrategy,
         AuthService,
         LocalStrategy,
-        LocalAuthGuard,
         CookieService,
         EmailVerificationRepository,
         RefreshTokenRepository,
