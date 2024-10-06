@@ -22,11 +22,11 @@ import { MailerConfig } from './config/Mailer.config';
       useFactory: (configService: ConfigService) => TypeOrmConfig.getOrmConfig(configService),
       inject: [ConfigService],
     }),
-    // NodemailerModule.forRootAsync({
-    //   useFactory: (ConfigService: ConfigService) => MailerConfig.getConfig(ConfigService),
-    //   inject: [ConfigService],
-    // })
-    // ,
+    NodemailerModule.forRootAsync({
+      useFactory: (ConfigService: ConfigService) => MailerConfig.getConfig(ConfigService),
+      inject: [ConfigService],
+    })
+    ,
     UsersModule,
     AuthModule,
   ],
