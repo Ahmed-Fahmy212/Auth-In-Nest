@@ -1,6 +1,7 @@
 import Logo from "@/app/(dashboard)/_components/logo";
 
 import MobileMenu from "@/app/(dashboard)/_components/mobile-menu";
+import { NavbarRoutes } from "@/components/navbar-routes";
 
 const Navbar = () => {
   return (
@@ -9,6 +10,7 @@ const Navbar = () => {
       <div className="hidden md:flex">
           <Logo />
       </div>
+          <NavbarRoutes />
 
       <MobileMenu />
     </div>
