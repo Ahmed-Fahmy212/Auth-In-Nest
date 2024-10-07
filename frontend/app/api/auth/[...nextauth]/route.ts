@@ -1,42 +1,33 @@
+import  {NextAuthOptions} from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { Backend_URL } from "../../../../lib/Constants";
 import NextAuth from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
-import { NextApiHandler } from "next";
-
-// wnat add full auth with oauth
-// want add session m,anagment 
-// want add admin and subadmins 
-// socket io chat 
-const options = {
+const authOptions: NextAuthOptions = {
     providers: [
-        GoogleProvider({
-            clientId: process.env.GOOGLE_CLIENT_ID as string,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-        }),
-        // Add more providers here
-    ],
-    session: {
-        jwt: true,
-    },
-    callbacks: {
-        async session(session: any, user: any) {
-            session.user.id = user.id;
-            return session;
-        },
-        async jwt(token, user) {
-            if (user) {
-                token.id = user.id;
+        CredentialsProvider({
+            name: 'Credentials',
+            credentials: {
+                username: {
+                    label: "Username", type: "text", placeholder: "jsmith",
+                },
+                password: { label: "Password", type: "password" }
+            },
+            async authorize(credentials) {
+                if (!credentials?.username || !credentials?.password) return null;
+                const { username, password } = credentials;
+                const res = await fetch(Backend_URL + 'auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password }),
+                })
+                if (res.status == 401) {
+                    console.log(res.statusText);
+                    return null;
+                }
+                const user = await res.json();
+                return user;
             }
-            return token;
-        },
-    },
-    pages: {
-        signIn: '/auth/signin',
-        signOut: '/auth/signout',
-        error: '/auth/error',
-        verifyRequest: '/auth/verify-request',
-        newUser: null,
-    },
-};
-
-const authHandler: NextApiHandler = (req, res) => NextAuth(req, res, options);
-export default authHandler;
+        }),
+    ],}
+    const handler = NextAuth(authOptions);
+    export { handler as GET, handler as POST };
