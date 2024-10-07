@@ -7,7 +7,8 @@ export class LoginBodyDto {
     @IsString()
     @IsNotEmpty()
     readonly username: string;
-
+    
+    @Expose()
     @IsString()
     @IsNotEmpty()
     readonly password: string;

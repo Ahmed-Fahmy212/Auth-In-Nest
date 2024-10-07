@@ -24,17 +24,6 @@ export class RequestLoggerInterceptor implements NestInterceptor {
         const duration = Date.now() - now;
         this.logger.log(`HTTP ${method} ${originalUrl} `);
         this.logger.log({
-          req: {
-            method,
-            originalUrl,
-            query,
-            url,
-            body,
-          },
-          res: {
-            body: data,
-            statusCode,
-          },
           date: new Date().toISOString(),
           duration: `${duration}ms`,
 

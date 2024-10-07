@@ -1,11 +1,11 @@
 import { ExecutionContext, Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Observable } from 'rxjs';
+import { LocalStrategy } from 'src/modules/auth/strategies/local.strategy';
 
 @Injectable()
 export class LocalAuthGuard extends AuthGuard('local') {
-    canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-        //! don`t understand this line in the hood
-        return super.canActivate(context);
+    constructor (private readonly localStrategy: LocalStrategy) {
+        super();
     }
 }

@@ -1,11 +1,11 @@
 import { HttpException, Inject, Injectable, NotFoundException, Scope } from '@nestjs/common';
-import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { BaseRepository } from 'src/common/base-repository';
 import { DataSource } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 
+import { REQUEST } from '@nestjs/core';
 @Injectable()
 export class UsersRepository extends BaseRepository {
     constructor(dataSource: DataSource, @Inject(REQUEST) req: Request) {
@@ -38,5 +38,8 @@ export class UsersRepository extends BaseRepository {
             .set({ password: newPassword })
             .where('user.email = :email', { email })
             .execute();
+    }
+    public async updateRefreshToken(userId: string, refreshToken: string, refreshTokenExpiration: Date) {
+        return await this.getRepository(User).update({ id: userId }, { refreshToken, refreshTokenExpiration });
     }
 }

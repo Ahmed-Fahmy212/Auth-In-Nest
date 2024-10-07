@@ -13,7 +13,7 @@ export class MailerConfig {
                 secure: true,
                 auth: {
                     user: configService.get<string>('MAILER_TRANSPORT_USER'),
-                    pass: configService.get<string>('MAILER_TRANSPORT_PASSWORD'),
+                    pass: configService.get<string>('MAILER_TRANSPORT_KEY'),
                 },
                 tls: {
                     rejectUnauthorized: false,

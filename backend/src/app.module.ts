@@ -22,13 +22,13 @@ import { MailerConfig } from './config/Mailer.config';
       useFactory: (configService: ConfigService) => TypeOrmConfig.getOrmConfig(configService),
       inject: [ConfigService],
     }),
-    // NodemailerModule.forRootAsync({
-    //   useFactory: (ConfigService: ConfigService) => MailerConfig.getConfig(ConfigService),
-    //   inject: [ConfigService],
-    // })
-    // ,
+    NodemailerModule.forRootAsync({
+      useFactory: (ConfigService: ConfigService) => MailerConfig.getConfig(ConfigService),
+      inject: [ConfigService],
+    })
+    ,
     UsersModule,
-    AuthModule
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService,
@@ -39,7 +39,7 @@ import { MailerConfig } from './config/Mailer.config';
     {
       provide: APP_INTERCEPTOR,
       useClass: TransactionInterceptor
-    }
+    },
   ],
 })
 export class AppModule { }

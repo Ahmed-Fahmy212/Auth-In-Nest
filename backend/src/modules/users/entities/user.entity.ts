@@ -27,11 +27,17 @@ export class User {
     @Column({ default: false })
     isEmailVerified: boolean;
 
+    @Column({ default: false })
+    isSuperAdmin: boolean;
+
     @Column()
     password: string;
 
     @Column({ nullable: true })
     refreshToken: string;
+
+    @Column({ nullable: true })
+    refreshTokenExpiration: Date;
 
     @UpdateDateColumn({ type: 'timestamp with time zone' })
     updatedAt: Date;
@@ -67,13 +73,11 @@ export class User {
         password: string,
         user: User,
     ): Promise<boolean> {
-        try { //! what other ways to crypt password?
+        try {
             const match = await bcrypt.compare(password, user.password);
-
             if (!match) {
-                throw new UnauthorizedException('Incorrect Username or Password !');
+                return null;
             }
-
             return match;
         } catch (error) {
             throw error;
