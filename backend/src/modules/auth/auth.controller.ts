@@ -25,7 +25,6 @@ import { AuthGuard } from '@nestjs/passport';
 import { RefreshTokenGuard } from 'src/guards/refresh-token.guard';
 import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
-import { GoogleAuthGuard } from 'src/guards/google-auth.guard';
 @Controller('auth')
 export class AuthController {
     constructor(
