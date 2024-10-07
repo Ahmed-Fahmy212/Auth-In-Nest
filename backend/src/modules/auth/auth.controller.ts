@@ -21,12 +21,17 @@ import { CookieService } from 'src/utils/RefreshToken';
 import { AuthUser } from 'src/decorators/auth-user.decorator';
 import { ResetPasswordDto } from './dto/resetPassword.dto';
 import { Protected } from 'src/decorators/protected.decorator';
-
+import { AuthGuard } from '@nestjs/passport';
+import { RefreshTokenGuard } from 'src/guards/refresh-token.guard';
+import { Request } from 'express';
+import { ConfigService } from '@nestjs/config';
+import { GoogleAuthGuard } from 'src/guards/google-auth.guard';
 @Controller('auth')
 export class AuthController {
     constructor(
         private authService: AuthService,
         private readonly cookieService: CookieService,
+        private readonly configService: ConfigService
     ) { }
 
     @Post('/register')
@@ -37,9 +42,11 @@ export class AuthController {
 
         const accessToken = await this.authService.signJwtAccessToken(user);
         const refreshToken = await this.authService.signJwtRefreshToken(user);
-        await this.authService.storeRefreshToken(user.id, refreshToken);
+        const expiration = new Date(new Date().getTime() + parseInt(this.configService.get<string>('JWT_REFRESH_EXPIRATION_TIME')) * 60000);
+        await this.authService.updateRefreshToken(user, refreshToken, expiration);
         await this.cookieService.setRefreshTokenToHttpOnlyCookie(response, refreshToken);
-        // await this.authService.generateEmailVerification(user.email);
+        await this.authService.generateEmailVerification(user.email);
+
         response.send({ data: { username: user.username, accessToken: accessToken, refreshToken: refreshToken } });
     }
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -48,9 +55,10 @@ export class AuthController {
     public async login(@AuthUser() user: User, @Res() response: Response) {
         const accessToken = await this.authService.signJwtAccessToken(user)
         const refreshToken = await this.authService.signJwtRefreshToken(user);
-        await this.authService.storeRefreshToken(user.id, refreshToken);
-
+        const expiration = new Date(new Date().getTime() + parseInt(this.configService.get<string>('JWT_REFRESH_EXPIRATION_TIME')) * 60000);
+        await this.authService.updateRefreshToken(user, refreshToken, expiration);
         await this.cookieService.setRefreshTokenToHttpOnlyCookie(response, refreshToken);
+
         response.send({ data: { username: user.username, accessToken: accessToken, refreshToken: refreshToken } });
     }
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -61,48 +69,40 @@ export class AuthController {
     /////////////////////////////////////////////////////////////////////////////////////////////
     @Post("send-email-verification")
     sendEmailVerification(@Body("email") email: string) {
-        return this.authService.sendEmailVerificationRequest(email);
+        return this.authService.sendEmailVerificationRequest(email, null);
     }
 
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    @UseGuards(RefreshTokenGuard)
+    @Post('refresh-token')
+    async refreshToken(@Req() request: Request, @Res() response: Response) {
+        console.log('💛💛 refresh token service')
+        const user = request.user;
+        return await this.authService.refreshToken(response, user)
+    }
     /////////////////////////////////////////////////////////////////////////////////////////////
     @Protected()
-    @Post('refresh-token')
-    async refreshToken(@Req() request, @Res() response: Response) {
-        const refreshToken = request.cookies?.refresh_token;
-        if (!refreshToken) {
-            throw new BadRequestException('Invalid token');
-        }
-        const user = request.user;
-        console.log("💛💛💛user", user);
-        if (!user) {
-            throw new BadRequestException('[USER] Invalid token');
-        }
-
-        return await this.authService.refreshToken(response, refreshToken, user);
-    }
-    /////////////////////////////////////////////////////////////////////////////////////////////
     @Get('me')
     async me(@AuthUser() user: User) {
         return user;
     }
     /////////////////////////////////////////////////////////////////////////////////////////////
-    @Protected()
-    @Get('forgot-password')
+    @Post('forgot-password')
     async forgotPassword(@Body("email") email: string) {
-        //TODO: remove refresh token and 
         return await this.authService.forgotPassword(email);
     }
     /////////////////////////////////////////////////////////////////////////////////////////////
-    @Protected()
     @Post('reset-password')
     async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
         return await this.authService.resetPassword(resetPasswordDto);
     }
+
     /////////////////////////////////////////////////////////////////////////////////////////////
     @Protected()
     @Post('logout')
-    //TODO: remove refresh token and 
-    async logout(@Res() response: Response) {
+    async logout(@Req() request, @Res() response: Response) {
+        const user = request.user.id;
+        await this.authService.clearRefreshTokenCookie(response, user);
         return 'ok';
     }
 }

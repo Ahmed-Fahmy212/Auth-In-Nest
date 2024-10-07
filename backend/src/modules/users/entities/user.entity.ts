@@ -73,13 +73,11 @@ export class User {
         password: string,
         user: User,
     ): Promise<boolean> {
-        try { //! what other ways to crypt password?
+        try {
             const match = await bcrypt.compare(password, user.password);
-
             if (!match) {
                 return null;
             }
-
             return match;
         } catch (error) {
             throw error;

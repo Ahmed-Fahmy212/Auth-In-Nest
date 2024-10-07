@@ -26,32 +26,41 @@ export class UsersService {
     }
     return createdUser;
   }
-////////////////////////////////////////////////////////////////////
-public async getUserByEmail(email: string) {
-  return this.userRepository.getUserByEmail(email);
-}
-////////////////////////////////////////////////////////////////////
-public async makeUserVerified(userId: string) {
-  return this.userRepository.makeUserVerified(userId);
-}
-////////////////////////////////////////////////////////////////////
-  public async editUserPassword(email: string, newPassword: string) {
-    return this.userRepository.editUserPassword(email, newPassword);
+  ////////////////////////////////////////////////////////////////////
+  public async getUserByEmail(email: string) {
+    return await this.userRepository.getUserByEmail(email);
   }
-////////////////////////////////////////////////////////////////////
-//   findAll() {
-//   return `This action returns all users`;
-// }
-// ////////////////////////////////////////////////////////////////////
-// findOne(id: number) {
-//   return `This action returns a #${id} user`;
-// }
-// ////////////////////////////////////////////////////////////////////
-// update(id: number, updateUserDto: UpdateUserDto) {
-//   return `This action updates a #${id} user`;
-// }
-// ////////////////////////////////////////////////////////////////////
-// remove(id: number) {
-//   return `This action removes a #${id} user`;
-// }
+  ////////////////////////////////////////////////////////////////////
+  public async makeUserVerified(userId: string) {
+    return await this.userRepository.makeUserVerified(userId);
+  }
+  ////////////////////////////////////////////////////////////////////
+  public async editUserPassword(email: string, newPassword: string) {
+    return await this.userRepository.editUserPassword(email, newPassword);
+  }
+  ////////////////////////////////////////////////////////////////////
+  public async updateRefreshToken(userId: string, refreshToken: string, refreshTokenExpiration: Date) {
+    const updatedData= await this.userRepository.updateRefreshToken(userId, refreshToken, refreshTokenExpiration);
+    if(!updatedData){
+      throw new UnauthorizedException('User not found');
+    }
+    return updatedData;
+  }
+
+  ////////////////////////////////////////////////////////////////////
+  //   findAll() {
+  //   return `This action returns all users`;
+  // }
+  // ////////////////////////////////////////////////////////////////////
+  // findOne(id: number) {
+  //   return `This action returns a #${id} user`;
+  // }
+  // ////////////////////////////////////////////////////////////////////
+  // update(id: number, updateUserDto: UpdateUserDto) {
+  //   return `This action updates a #${id} user`;
+  // }
+  // ////////////////////////////////////////////////////////////////////
+  // remove(id: number) {
+  //   return `This action removes a #${id} user`;
+  // }
 }

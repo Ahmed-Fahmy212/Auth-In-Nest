@@ -39,4 +39,7 @@ export class UsersRepository extends BaseRepository {
             .where('user.email = :email', { email })
             .execute();
     }
+    public async updateRefreshToken(userId: string, refreshToken: string, refreshTokenExpiration: Date) {
+        return await this.getRepository(User).update({ id: userId }, { refreshToken, refreshTokenExpiration });
+    }
 }
