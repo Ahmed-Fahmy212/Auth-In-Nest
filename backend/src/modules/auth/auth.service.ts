@@ -12,8 +12,7 @@ import { ResetPasswordDto } from './dto/resetPassword.dto';
 import { Response } from 'express';
 import { CookieService } from 'src/utils/RefreshToken';
 import { Nodemailer, NodemailerDrivers } from '@crowdlinker/nestjs-mailer';
-import { IRegisterSocialUser } from './interfaces/register-social-user.interface';
-import { IHandleSocialLogin } from './strategies/handle-social-login.interface';
+
 @Injectable()
 export class AuthService {
     constructor(

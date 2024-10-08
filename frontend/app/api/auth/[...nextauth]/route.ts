@@ -1,4 +1,4 @@
-import  {NextAuthOptions} from "next-auth";
+import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { Backend_URL } from "../../../../lib/Constants";
 import NextAuth from "next-auth";
@@ -28,6 +28,24 @@ const authOptions: NextAuthOptions = {
                 return user;
             }
         }),
-    ],}
-    const handler = NextAuth(authOptions);
-    export { handler as GET, handler as POST };
+    ],
+    callbacks: {
+        async jwt({ token, user }) {
+            if (user) return { ...token, ...user };
+
+            // if (new Date().getTime() < token.data.tokens.expiresIn)
+            return token;
+
+            // return await refreshToken(token);
+        },
+
+        async session({ session, token }) {
+            session.user = token.user;
+            session.tokens = token.tokens;
+
+            return session;
+        },
+    },
+}
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };

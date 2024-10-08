@@ -13,7 +13,7 @@ const SignInButton = () => {
         <p className="text-sky-600">{session.user.name}</p>
         <Link
           href={"/api/auth/signout"}
-          className="flex gap-4 ml-auto text-sky-800"
+          className="flex gap-4 ml-auto text-black"
         >
           Sign Out
         </Link>
@@ -26,10 +26,10 @@ const SignInButton = () => {
         href={"/api/auth/signin"}
         className="flex gap-4 ml-auto text-sky-800"
       >
-        Log In
+        Sign In
       </Link>
       <Link
-        href={"/api/auth/signup"}
+        href={"/signup"}
         className="flex gap-4 ml-auto bg-sky-800 text-white p-2 rounded hover:bg-sky-900 duration-300"
       >
         Sign Up
