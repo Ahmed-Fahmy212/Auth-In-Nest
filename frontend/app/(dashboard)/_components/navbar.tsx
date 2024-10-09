@@ -2,7 +2,6 @@ import Logo from "@/app/(dashboard)/_components/logo";
 
 import MobileMenu from "@/app/(dashboard)/_components/mobile-menu";
 import { NavbarRoutes } from "@/components/navbar-routes";
-import  SignInButton  from "../../../components/signsButtons";
 
 const Navbar = () => {
   return (
@@ -12,7 +11,6 @@ const Navbar = () => {
           <Logo />
       </div>
           <NavbarRoutes />
-          <SignInButton />
       <MobileMenu />
     </div>
   );
