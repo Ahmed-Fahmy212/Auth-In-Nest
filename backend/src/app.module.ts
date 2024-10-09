@@ -12,6 +12,7 @@ import { TransactionInterceptor } from './interceptors/transaction.interceptor';
 import { NodemailerDrivers, NodemailerModule, NodemailerOptions } from "@crowdlinker/nestjs-mailer";
 import { config } from 'process';
 import { MailerConfig } from './config/Mailer.config';
+import { CourseModule } from './modules/course/course.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { MailerConfig } from './config/Mailer.config';
     ,
     UsersModule,
     AuthModule,
+    CourseModule,
   ],
   controllers: [AppController],
   providers: [AppService,
