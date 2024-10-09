@@ -14,6 +14,7 @@ import { config } from 'process';
 import { MailerConfig } from './config/Mailer.config';
 import { CourseModule } from './modules/course/course.module';
 import { AttachmentModule } from './modules/attachment/attachment.module';
+import { CategoryModule } from './modules/category/category.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { AttachmentModule } from './modules/attachment/attachment.module';
     AuthModule,
     CourseModule,
     AttachmentModule,
+    CategoryModule,
   ],
   controllers: [AppController],
   providers: [AppService,
