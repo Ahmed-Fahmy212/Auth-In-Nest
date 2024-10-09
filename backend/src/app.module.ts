@@ -16,6 +16,7 @@ import { CourseModule } from './modules/course/course.module';
 import { AttachmentModule } from './modules/attachment/attachment.module';
 import { CategoryModule } from './modules/category/category.module';
 import { ChapterModule } from './modules/chapter/chapter.module';
+import { MuxDataModule } from './modules/mux-data/mux-data.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { ChapterModule } from './modules/chapter/chapter.module';
     AttachmentModule,
     CategoryModule,
     ChapterModule,
+    MuxDataModule,
   ],
   controllers: [AppController],
   providers: [AppService,
