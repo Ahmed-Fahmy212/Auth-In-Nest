@@ -15,6 +15,7 @@ import { MailerConfig } from './config/Mailer.config';
 import { CourseModule } from './modules/course/course.module';
 import { AttachmentModule } from './modules/attachment/attachment.module';
 import { CategoryModule } from './modules/category/category.module';
+import { ChapterModule } from './modules/chapter/chapter.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { CategoryModule } from './modules/category/category.module';
     CourseModule,
     AttachmentModule,
     CategoryModule,
+    ChapterModule,
   ],
   controllers: [AppController],
   providers: [AppService,
