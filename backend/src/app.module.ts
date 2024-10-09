@@ -13,6 +13,7 @@ import { NodemailerDrivers, NodemailerModule, NodemailerOptions } from "@crowdli
 import { config } from 'process';
 import { MailerConfig } from './config/Mailer.config';
 import { CourseModule } from './modules/course/course.module';
+import { AttachmentModule } from './modules/attachment/attachment.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { CourseModule } from './modules/course/course.module';
     UsersModule,
     AuthModule,
     CourseModule,
+    AttachmentModule,
   ],
   controllers: [AppController],
   providers: [AppService,
