@@ -17,6 +17,7 @@ import { AttachmentModule } from './modules/attachment/attachment.module';
 import { CategoryModule } from './modules/category/category.module';
 import { ChapterModule } from './modules/chapter/chapter.module';
 import { MuxDataModule } from './modules/mux-data/mux-data.module';
+import { UserProgressModule } from './modules/user-progress/user-progress.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { MuxDataModule } from './modules/mux-data/mux-data.module';
     CategoryModule,
     ChapterModule,
     MuxDataModule,
+    UserProgressModule,
   ],
   controllers: [AppController],
   providers: [AppService,
