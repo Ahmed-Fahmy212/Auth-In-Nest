@@ -2,6 +2,7 @@
 
 import { useRouter, usePathname } from "next/navigation";
 import React from "react";
+import SignInButton from "./signsButtons";
 
 // import { UserButton } from "@clerk/nextjs"
 
@@ -24,7 +25,9 @@ export const NavbarRoutes = () => {
         </button>
       ) : (
         <>
-          <button
+                  <SignInButton />
+
+          {/* <button
             onClick={() => router.push("/teacher/courses")}
             type="button"
             className=" rounded-xl  text-white bg-[#042539] py-1 px-3 shadow-lg  "
@@ -37,7 +40,7 @@ export const NavbarRoutes = () => {
             className="text-gray-700 hover:text-black"
           >
             Login
-          </button>
+          </button> */}
         </>
       )}
       {/* <a href="/" className="text-gray-700 hover:text-gray-900">Home</a> */}

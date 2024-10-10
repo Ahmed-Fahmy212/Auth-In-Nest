@@ -7,7 +7,7 @@ interface SidebarItemProps {
   href: string;
 }
 const SidebarItem = ({ icon: Icon, label, href }: SidebarItemProps) => {
-  const pathname = usePathname();
+const pathname = usePathname();
   const router = useRouter();
 
   const isActive =

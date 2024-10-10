@@ -11,7 +11,6 @@ const Navbar = () => {
           <Logo />
       </div>
           <NavbarRoutes />
-
       <MobileMenu />
     </div>
   );
