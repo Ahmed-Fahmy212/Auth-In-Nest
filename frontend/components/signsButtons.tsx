@@ -1,11 +1,11 @@
 "use client";
-import {useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import React from "react";
 
 const SignInButton = () => {
   const { data: session } = useSession();
-  console.log("💛💛 session data :",{session});
+  console.log("💛💛 session data :", { session });
   ///TODO : change this
   if (session && session.user.id && session.user.name)
     return (
@@ -28,14 +28,12 @@ const SignInButton = () => {
       >
         Sign Up
       </Link>
+
+      
       <Link
-      //TODO : change this 
-        href={"#"}
-        className="flex gap-4 ml-auto text-sky-800"
-      >
-        <a href="http://localhost:3000/api/auth">Sign In
-        </a>
-        
+        href={"/api/auth/signin"}
+        className="flex gap-4 ml-auto text-sky-800">
+        Sign In
       </Link>
     </div>
   );

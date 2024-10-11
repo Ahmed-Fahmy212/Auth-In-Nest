@@ -1,106 +1,152 @@
 "use client";
 
-import { Button } from "@/components/Button";
-import InputBox from "@/components/InputBox";
-import { Backend_URL } from "@/lib/Constants";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormLabel,
+  FormMessage,
+  FormItem,
+} from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import React, { useRef } from "react";
-import { Bounce, toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import toast from "react-hot-toast";
+import { Backend_URL } from "@/lib/Constants";
 
-
-type FormInputs = {
-  name: string;
-  email: string;
-  password: string;
-};
+const formSchema = z.object({
+  name: z.string().min(1, {
+    message: "Name is required",
+  }),
+  email: z.string().email({
+    message: "Invalid email address",
+  }),
+  password: z.string().min(6, {
+    message: "Password must be at least 6 characters",
+  }),
+});
 
 const SignupPage = () => {
-  // const router = useRouter();
-
-  const register = async () => {
-    const res = await fetch(Backend_URL + "auth/register", {
-      method: "POST",
-      body: JSON.stringify({
-        username: data.current.name,
-        email: data.current.email,
-        password: data.current.password,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const errorData = await res.json();
-    if (!res.ok) {
-      //TODO make this in better
-      toast.error(`${errorData.error}`, {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        theme: "dark",
-        transition: Bounce,
-      });
-      return errorData;
-    }
-    toast.success(`Regisred successfully`);
-    //TODO FIX THIS
-    
-    // router.push('/');
-  };
-  const data = useRef<FormInputs>({
-    name: "",
-    email: "",
-    password: "",
+  const router = useRouter();
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+    },
   });
+
+  const { isSubmitting, isValid } = form.formState;
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      const res = await fetch(Backend_URL + "auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
+
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+      console.log("💛💛💛💛 res", res);
+      console.log("💛💛💛💛 values", values);
+      toast.success("Registered successfully");
+      router.push("/");
+    } catch (error) {
+      console.error("💛💛💛💛 error", error);
+      toast.error("Registration failed");
+    }
+  };
+
   return (
-    <div className="m-2 border rounded shadow-lg overflow-hidden">
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="dark"
-      />
-
-      <div className="p-2 bg-gradient-to-b from-white to-slate-200 text-slate-600">
-        Sign Up
-      </div>
-
-      <div className="p-4 flex flex-col gap-6">
-        <InputBox
-          name="name"
-          labelText="Name"
-          required
-          autoComplete="off"
-          onChange={(e) => (data.current.name = e.target.value)}
-        />
-
-        <InputBox
-          name="email"
-          labelText="Email"
-          required
-          onChange={(e) => (data.current.email = e.target.value)}
-        />
-
-        <InputBox
-          name="password"
-          labelText="Password"
-          type="password"
-          required
-          onChange={(e) => (data.current.password = e.target.value)}
-        />
-
-        <div className="flex justify-center items-center gap-4">
-          <Button onClick={register}>Submit</Button>
-          <Link href="/" className="text-blue-500 hover:underline">
-            Cancel
-          </Link>
-        </div>
+    <div className="p-6 max-w-5xl mx-auto h-full flex justify-center items-center overflow-hidden">
+      <div className="border rounded-2xl p-8 flex justify-center items-center flex-col">
+        <div className="text-2xl text-slate-600">Sign Up</div>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-8 mt-8 w-full md:w-96"
+          >
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-slate-600 ">Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={isSubmitting}
+                      placeholder="Name"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-slate-600">Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={isSubmitting}
+                      placeholder="Email"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-slate-600">Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      disabled={isSubmitting}
+                      placeholder="Password"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="w-full flex items-center content-center gap-x-2 ">
+              <Link href="/">
+                <Button variant="ghost" type="button">
+                  Cancel
+                </Button>
+              </Link>
+              <Link href={"/"}>
+                <Button
+                  type="submit"
+                  disabled={!isValid || isSubmitting}
+                  variant="ghost"
+                  className="bg-black text-white rounded"
+                >
+                  Submit
+                </Button>
+              </Link>
+            </div>
+          </form>
+        </Form>
       </div>
     </div>
   );

@@ -3,6 +3,9 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { Backend_URL } from "../../../../lib/Constants"; // Ensure this imports the correct URL
 import NextAuth from "next-auth";
 
+// const isDefaultSigninPage = req.method === "GET" && req.query.nextauth.includes("signin")
+// if (isDefaultSigninPage) providers.pop()
+
 const authOptions: NextAuthOptions = {
     providers: [
         CredentialsProvider({
@@ -64,6 +67,5 @@ const authOptions: NextAuthOptions = {
         // verifyRequest: '/verify-request',
     //   },
 };
-
 const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
