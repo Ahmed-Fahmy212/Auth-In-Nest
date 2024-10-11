@@ -16,12 +16,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { Backend_URL } from "@/lib/Constants";
+import Error from "next/error";
 
 const formSchema = z.object({
-  name: z.string().min(1, {
-    message: "Name is required",
+  username: z.string().min(1, {
+    message: "Username is required",
   }),
   email: z.string().email({
     message: "Invalid email address",
@@ -36,17 +37,17 @@ const SignupPage = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
+      username: "",
       email: "",
       password: "",
     },
   });
 
   const { isSubmitting, isValid } = form.formState;
-
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const res = await fetch(Backend_URL + "auth/register", {
+      console.log("💛💛💛💛 values", values);
+      const res = await fetch(`${Backend_URL}auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -55,15 +56,14 @@ const SignupPage = () => {
       });
 
       if (!res.ok) {
-        throw new Error(await res.text());
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Registration failed");
       }
-      console.log("💛💛💛💛 res", res);
-      console.log("💛💛💛💛 values", values);
+
+      router.push("/teacher");
       toast.success("Registered successfully");
-      router.push("/");
     } catch (error) {
-      console.error("💛💛💛💛 error", error);
-      toast.error("Registration failed");
+      toast.error(`Registration failed: ${error.message}`);
     }
   };
 
@@ -78,10 +78,10 @@ const SignupPage = () => {
           >
             <FormField
               control={form.control}
-              name="name"
-              render={({ field }) => (
+              name="username"
+              render={({ field, fieldState }) => (
                 <FormItem>
-                  <FormLabel className="text-slate-600 ">Name</FormLabel>
+                  <FormLabel className="text-slate-600">Name</FormLabel>
                   <FormControl>
                     <Input
                       disabled={isSubmitting}
@@ -89,14 +89,16 @@ const SignupPage = () => {
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-red-700">
+                    {fieldState.error?.message}
+                  </FormMessage>
                 </FormItem>
               )}
             />
             <FormField
               control={form.control}
               name="email"
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <FormItem>
                   <FormLabel className="text-slate-600">Email</FormLabel>
                   <FormControl>
@@ -106,44 +108,48 @@ const SignupPage = () => {
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-red-700">
+                    {fieldState.error?.message}
+                  </FormMessage>
                 </FormItem>
               )}
             />
             <FormField
               control={form.control}
               name="password"
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <FormItem>
                   <FormLabel className="text-slate-600">Password</FormLabel>
                   <FormControl>
                     <Input
                       type="password"
-                      disabled={isSubmitting}
+                      // disabled={isSubmitting}
                       placeholder="Password"
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-red-700">
+                    {fieldState.error?.message}
+                  </FormMessage>
                 </FormItem>
               )}
             />
-            <div className="w-full flex items-center content-center gap-x-2 ">
+            <div className="flex items-center justify-center gap-x-2 ">
+            <Button
+                type="submit"
+                disabled={!isValid}
+                variant="ghost"
+                className="bg-black text-white rounded hover:bg-black hover:text-slate-300"
+              >
+                Submit
+              </Button>
+
               <Link href="/">
                 <Button variant="ghost" type="button">
                   Cancel
                 </Button>
               </Link>
-              <Link href={"/"}>
-                <Button
-                  type="submit"
-                  disabled={!isValid || isSubmitting}
-                  variant="ghost"
-                  className="bg-black text-white rounded"
-                >
-                  Submit
-                </Button>
-              </Link>
+
             </div>
           </form>
         </Form>
