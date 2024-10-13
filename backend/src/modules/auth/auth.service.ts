@@ -95,9 +95,10 @@ export class AuthService {
     }
 
     ////////////////////////////////////////////////////////////////////
-    public async verifyEmail(token: string): Promise<User> {
-        const emailVerificationData = await this.emailVerificationRepository.getEmailVerificationData({ emailToken: token });
-        if (!emailVerificationData || !emailVerificationData.email) throw new BadRequestException("invalid email token, please send valid one");
+    public async verifyEmail(email: string, token: string): Promise<Partial<User>> {
+        const emailVerificationData = await this.emailVerificationRepository.getEmailVerificationData({ email: email });
+        if (!emailVerificationData || !emailVerificationData.email || !emailVerificationData.emailToken) throw new BadRequestException("invalid email token, please send valid one");
+        if (emailVerificationData.emailToken !== token) throw new BadRequestException("invalid token");
         // check if EmailVerification Expired or not
         const currentTime = new Date();
         const timestamp = new Date(emailVerificationData.timestamp);
@@ -114,7 +115,8 @@ export class AuthService {
 
         await this.deleteEmailVerificationById(emailVerificationData.id);
         userData.isEmailVerified = true;
-        return userData;
+        const { password, ...safeUserData } = userData;
+        return safeUserData;
     }
     //////////////////////////////////////////////////////////////////
     public async refreshToken(response: Response, user: Partial<User>) {
@@ -209,8 +211,8 @@ export class AuthService {
             to: `${email}`,
             subject: "Verify Email",
             text: "Verify Email",
-            html: `Hi <br><br> ${content} <h3></h3>
-                Token : ${emailToken}`
+            html: `Hi <br><br> ${content}<br><br>   
+            <h3>Token: ${emailToken}</h3>`
         };
         const sendMail = await this.nodeMailerService.sendMail(sendMailPayload);
         if (!sendMail) throw new BadRequestException('Email not sent');
@@ -267,7 +269,7 @@ export class AuthService {
                     refreshToken: tokens.refreshToken,
                     expiresIn: expiresInMilliseconds
                 }
-            } 
+            }
         };
     }
     ////////////////////////////////////////////////////////////////////
