@@ -196,8 +196,8 @@ export class AuthService {
     public async sendEmailVerificationRequest(email: string, emailToken?: string, content?: string): Promise<string> {
         if (!emailToken)
             emailToken = (Math.floor(Math.random() * (900000)) + 100000).toString();
-
-        const url = `<a style="text-decoration: none" href= "http://${this.configService.get<string>('FRONTEND_URL_HOST')}/#/${this.configService.get('FRONTEND_URL_VERIFY_CODE')}/${emailToken}">Click Here To Confirm Your Email</a>`;
+        //TODO handle in frontend to be better in url like this 
+        // const url = `<a style="text-decoration: none" href= "http://${this.configService.get<string>('FRONTEND_URL_HOST')}/#/${this.configService.get('FRONTEND_URL_VERIFY_CODE')}/${emailToken}">Click Here To Confirm Your Email</a>`;
 
         if (!content) content = `Thanks for registration please verify your email`
         const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
@@ -210,7 +210,7 @@ export class AuthService {
             subject: "Verify Email",
             text: "Verify Email",
             html: `Hi <br><br> ${content} <h3></h3>
-                ${url}`
+                Token : ${emailToken}`
         };
         const sendMail = await this.nodeMailerService.sendMail(sendMailPayload);
         if (!sendMail) throw new BadRequestException('Email not sent');
@@ -267,7 +267,7 @@ export class AuthService {
                     refreshToken: tokens.refreshToken,
                     expiresIn: expiresInMilliseconds
                 }
-            }
+            } 
         };
     }
     ////////////////////////////////////////////////////////////////////
