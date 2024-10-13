@@ -49,8 +49,8 @@ export class AuthController {
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     @Post('verify-email')
-    async verifyEmail(@Body() data: { token: string, email: string }) {
-        return await this.authService.verifyEmail(data.email , data.token);
+    async verifyEmail(@Body() data: { emailToken: string, email: string }) {
+        return await this.authService.verifyEmail(data.email , data.emailToken);
     }
     /////////////////////////////////////////////////////////////////////////////////////////////
     @Post("send-email-verification")

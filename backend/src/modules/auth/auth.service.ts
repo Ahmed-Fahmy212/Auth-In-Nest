@@ -89,7 +89,7 @@ export class AuthService {
         };
         const createdEmailVerifyCode = await this.emailVerificationRepository.createEmailVerification(createEmailVerificationPayload);
         if (!createdEmailVerifyCode) throw new BadRequestException('Email verification code not created');
-        await this.sendEmailVerificationRequest(email);
+        await this.sendEmailVerificationRequest(email, emailToken);
 
         return createdEmailVerifyCode;
     }
@@ -199,6 +199,7 @@ export class AuthService {
         if (!emailToken)
             emailToken = (Math.floor(Math.random() * (900000)) + 100000).toString();
         //TODO handle in frontend to be better in url like this 
+        console.log("💛💛emailToken", emailToken);
         // const url = `<a style="text-decoration: none" href= "http://${this.configService.get<string>('FRONTEND_URL_HOST')}/#/${this.configService.get('FRONTEND_URL_VERIFY_CODE')}/${emailToken}">Click Here To Confirm Your Email</a>`;
 
         if (!content) content = `Thanks for registration please verify your email`
