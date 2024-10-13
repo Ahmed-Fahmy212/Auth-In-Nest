@@ -40,13 +40,25 @@ export class UsersService {
   }
   ////////////////////////////////////////////////////////////////////
   public async updateRefreshToken(userId: string, refreshToken: string, refreshTokenExpiration: Date) {
-    const updatedData= await this.userRepository.updateRefreshToken(userId, refreshToken, refreshTokenExpiration);
-    if(!updatedData){
+    const updatedData = await this.userRepository.updateRefreshToken(userId, refreshToken, refreshTokenExpiration);
+    if (!updatedData) {
       throw new UnauthorizedException('User not found');
     }
     return updatedData;
   }
 
+  ////////////////////////////////////////////////////////////////////
+public async findById(id: string): Promise<User> {
+  try {
+    const user = await this.userRepository.findById(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  } catch (error) {
+    throw new NotFoundException(error.message);
+  }
+}
   ////////////////////////////////////////////////////////////////////
   //   findAll() {
   //   return `This action returns all users`;

@@ -16,19 +16,19 @@ export class RefreshTokenStrategy extends PassportStrategy(Strategy, "refresh-to
     ) {
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-            secretOrKey: configService.get<string>("JWT_ACCESS_TOKEN_SECRET"),
-            ignoreExpiration: true,
-            passReqToCallback: true
+            secretOrKey: configService.get<string>("JWT_REFRESH_TOKEN_SECRET"),
+            ignoreExpiration: false, //TODO make this renewavble permentant 
+            passReqToCallback: true 
         });
     }
 
     async validate(request: Request, payload: Record<string, any>) {
-        const { email } = payload;
+        const { sub } = payload;
         const refreshToken = request.cookies.refresh_token;
         if (!refreshToken) {
             throw new UnauthorizedException('No refresh token found, please log in again.');
         }
-        const userData = await this.userService.getUserByEmail(email);
+        const userData = await this.userService.findById(sub);
 
         if (!userData) {
             throw new UnauthorizedException();

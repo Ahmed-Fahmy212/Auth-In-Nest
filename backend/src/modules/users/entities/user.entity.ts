@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { UnauthorizedException } from '@nestjs/common';
+import { UserRole } from 'src/modules/auth/dto/register.dto';
 
 @Entity()
 @Index(['username', 'email'])
@@ -39,6 +40,9 @@ export class User {
     @Column({ nullable: true })
     refreshTokenExpiration: Date;
 
+    @Column({default: UserRole.STUDENT})
+    role: UserRole;
+    
     @UpdateDateColumn({ type: 'timestamp with time zone' })
     updatedAt: Date;
 

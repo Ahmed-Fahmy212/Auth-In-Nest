@@ -1,5 +1,10 @@
-import { IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsEnum } from 'class-validator';
 
+export enum UserRole {
+  STUDENT = 'student',
+  TEACHER = 'teacher',
+}
 export class RegisterBodyDto {
   @MinLength(4)
   @IsNotEmpty()
@@ -15,4 +20,8 @@ export class RegisterBodyDto {
   @IsNotEmpty()
   @IsString()
   password: string;
+
+  @IsOptional()
+  @IsEnum(UserRole)
+  role?: UserRole ;
 }

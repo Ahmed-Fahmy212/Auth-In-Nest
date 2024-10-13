@@ -7,7 +7,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { LocalStrategy } from './strategies/local.strategy';
 import { LocalAuthGuard } from '../../guards/local-auth.guard';
-import { CookieService } from 'src/utils/RefreshToken';
 import { EmailVerificationRepository } from './repositories/emailVerification.repository';
 import { Nodemailer } from '@crowdlinker/nestjs-mailer';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
@@ -32,7 +31,6 @@ import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
         JwtStrategy,
         AuthService,
         LocalStrategy,
-        CookieService,
         EmailVerificationRepository,
         RefreshTokenGuard, RefreshTokenStrategy, JwtAuthGuard],
     controllers: [AuthController],

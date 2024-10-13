@@ -11,16 +11,16 @@ export class UsersRepository extends BaseRepository {
     constructor(dataSource: DataSource, @Inject(REQUEST) req: Request) {
         super(dataSource, req);
     }
-
+    public async findById(id: string): Promise<User> {
+        return await this.getRepository(User).findOne({ where: { id } });
+    }
     public async findByUsername(username: string): Promise<User> {
         const queryBuilder = this.getRepository(User).createQueryBuilder('user');
         return await queryBuilder.where('user.username = :username', { username }).getOne();
     }
     public async create(createUserDto: CreateUserDto): Promise<User> {
         const user = this.getRepository(User).create({
-            username: createUserDto.username,
-            password: createUserDto.password,
-            email: createUserDto.email,
+            ...createUserDto
         });
         const createdUser = await this.getRepository(User).save(user);
         return createdUser;

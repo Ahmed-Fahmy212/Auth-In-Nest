@@ -10,7 +10,6 @@ import { ICreateEmailVerification } from './interfaces/create-email-verification
 import { ResetPasswordDto } from './dto/resetPassword.dto';
 // import { ForgottenPassword } from '../users/entities/forgotten-password.entity';
 import { Response } from 'express';
-import { CookieService } from 'src/utils/RefreshToken';
 import { Nodemailer, NodemailerDrivers } from '@crowdlinker/nestjs-mailer';
 @Injectable()
 export class AuthService {
@@ -20,7 +19,6 @@ export class AuthService {
         private readonly jwtService: JwtService,
         private nodeMailerService: Nodemailer<NodemailerDrivers.SMTP>,
         private readonly configService: ConfigService,
-        private readonly cookieService: CookieService,
     ) { }
     /////////////////////////////////////////////////////////////////////////////////
     public async validateUser(loginBodyDto: LoginBodyDto): Promise<User> {
@@ -47,13 +45,15 @@ export class AuthService {
         }
         return insertedUser;
     }
-  
+
     /////////////////////////////////////////////////////////////////////////////////
     // sign jwt access token
     public async signJwtAccessToken(user: Partial<User>): Promise<string> {
         const signedAccessToken = {
             username: user.username,
             email: user.email,
+            sub: user.id,
+            role: user.role,
         }
         return await this.generateJwtToken(signedAccessToken,
             this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
@@ -63,8 +63,6 @@ export class AuthService {
     }
     public async signJwtRefreshToken(user: Partial<User>): Promise<string> {
         const signedRefreshToken = {
-            username: user.username,
-            email: user.email,
             sub: user.id,
         }
         return await this.generateJwtToken(
@@ -125,7 +123,7 @@ export class AuthService {
             const expiresIn = new Date(new Date().getTime() + parseInt(this.configService.get<string>('JWT_REFRESH_EXPIRATION_TIME')) * 60000)
             await this.usersService.updateRefreshToken(user.id, newRefreshToken, expiresIn);
             const newAccessToken = await this.signJwtAccessToken(user);
-            await this.cookieService.setRefreshTokenToHttpOnlyCookie(response, newRefreshToken);
+            // await this.cookieService.setRefreshTokenToHttpOnlyCookie(response, newRefreshToken);
 
             return response.send({
                 data: {
@@ -219,27 +217,79 @@ export class AuthService {
         return "email verification code sent successfully";
     }
     //////////////////////////////////////////////////////////////////
-    public async updateRefreshToken(user: Partial<User>, refreshToken: string, expiration: Date) {
+
+    // public async clearRefreshTokenCookie(response: Response, userId: string) {
+    //     try {
+    //         //TODO handle in frontend
+    //         //  response.clearCookie('refresh_token', {
+    //         //     httpOnly: true,
+    //         //     path: '/',
+    //         //     secure: false,
+    //         //     sameSite: 'strict',
+    //         await this.usersService.updateRefreshToken(userId, '', new Date());
+
+    //     } catch (error) {
+    //         throw new ServiceUnavailableException('Refresh token cookie not cleared');
+    //     }
+    // }
+    ////////////////////////////////////////////////////////////////////
+
+    public async handleTokenGeneration(user: User) {
+
+        const accessToken = await this.signJwtAccessToken(user);
+        const refreshToken = await this.signJwtRefreshToken(user);
+        await this.updateRefreshToken(user, refreshToken);
+        //TODO is this ok to handled in front ?
+        // await this.cookieService.setRefreshTokenToHttpOnlyCookie(refreshToken);
+
+        return { accessToken, refreshToken };
+    }
+
+    ////////////////////////////////////////////////////////////////////
+    public async updateRefreshToken(user: Partial<User>, refreshToken: string) {
+        const expiration = new Date(new Date().getTime() + parseInt(this.configService.get<string>('JWT_REFRESH_EXPIRATION_TIME')) * 60000);
         await this.usersService.updateRefreshToken(user.id, refreshToken, expiration);
     }
     //////////////////////////////////////////////////////////////////
-    public async clearRefreshTokenCookie(response: Response, userId: string) {
-        try {
-            response.clearCookie('refresh_token', {
-                httpOnly: true,
-                path: '/',
-                secure: false,
-                sameSite: 'strict',
-            });
-            await this.usersService.updateRefreshToken(userId, '', new Date());
-        } catch (error) {
-            throw new ServiceUnavailableException('Refresh token cookie not cleared');
-        }
+    public async createResponseData(user: User, tokens: { accessToken: string; refreshToken: string }) {
+        const accessTokenExpiration = this.configService.get<string>("JWT_ACCESS_EXPIRATION_TIME");
+        // const expiresInMilliseconds = this.convertToMilliseconds(accessTokenExpiration);
+        const expiresInMilliseconds = parseInt(accessTokenExpiration) * 60000;
+        return {
+            data: {
+                id: user.id,
+                name: user.username,
+                email: user.email,
+                role: user.role,
+                isEmailVerified: user.isEmailVerified,
+                tokens: {
+                    accessToken: tokens.accessToken,
+                    refreshToken: tokens.refreshToken,
+                    expiresIn: expiresInMilliseconds
+                }
+            }
+        };
     }
+    ////////////////////////////////////////////////////////////////////
+    // private convertToMilliseconds(time: string): number {
+    //     const timeValue = parseInt(time.slice(0, -1));
+    //     const timeUnit = time.slice(-1);
+
+    //     switch (timeUnit) {
+    //         case 's':
+    //             return timeValue * 1000;
+    //         case 'm':
+    //             return timeValue * 60 * 1000;
+    //         case 'h':
+    //             return timeValue * 60 * 60 * 1000;
+    //         case 'd':
+    //             return timeValue * 24 * 60 * 60 * 1000;
+    //         default:
+    //             throw new Error('Invalid time format');
+    //     }
+    // }
 
 }
-
-////////////////////////////////////////////////////////////////////
 
 
 
