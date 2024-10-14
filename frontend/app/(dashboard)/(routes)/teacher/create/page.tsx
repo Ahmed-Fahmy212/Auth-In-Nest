@@ -18,7 +18,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import toast from "react-hot-toast";
 
 const formSchema = z.object({
   title: z.string().min(1, {
